@@ -12,6 +12,12 @@ vector<BorrowRecord> borrowRecords;
 vector<Reservation> reservations;
 vector<MonthlyStatistics> monthlyStats(12);
 
+
+void pause() {
+	cout << "Press enter to continue...";
+	cin.get();
+}
+
 //Generate unique ID
 string generateID(const string& prefix, int number) {
 	stringstream ss;
@@ -31,7 +37,33 @@ string getDateFromDays(int daysOffset) {
 
 //Calculate days differnt between two dates
 int calculateDaysDifference(const string& date1, const string& date2) {
-	return 1;
+
+	int d1, m1, y1, d2, m2, y2;
+	char slash;
+
+	stringstream ss1(date1);
+	ss1 >> d1 >> m1 >> y1;
+
+	stringstream ss2(date2);
+	ss2 >> d2 >> m2 >> y2;
+
+	int daysInMonth[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+
+	int total1 = 0;
+	for (int y = 0; y < y1; y++)
+		total1 += 365;
+	for (int m = 0; m < m1; m++)
+		total1 += daysInMonth[m];
+	total1 += d1;
+
+	int total2 = 0;
+	for (int y = 0; y < y2; y++)
+		total2 += 365;
+	for (int m = 0; m < m2; m++)
+		total2 += daysInMonth[m];
+	total2 += d2;
+
+	return total1 - total2;
 }
 
 //Convert BookStatus to string
@@ -61,6 +93,16 @@ string reservationStatusToString(ReservationStatus status) {
 	else {
 		return "Cancelled";
 	}
+}
+
+bool findMemberByID(const string& id, int& index) {
+	for (size_t i = 0; i < members.size(); i++) {
+		if (members[i].memberID == id) {
+			index = i;
+			return true;
+		}
+	}
+	return false;
 }
 
 // =========================== File Operations ===========================

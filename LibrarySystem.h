@@ -83,6 +83,7 @@ extern vector<Reservation> reservations;
 extern vector<MonthlyStatistics> monthlyStats;
 
 //Shared helper functions (used by multiple modules)
+void pause();
 string generateID(const string& prefix, int number);
 string getCurrentDate();
 string getDateFromDays(int daysOffset);
@@ -91,6 +92,7 @@ string membershipTypeToString(MembershipType type);
 MembershipType stringToMembershipType(const string& str);
 string bookStatusToString(BookStatus status);
 string reservationStatusToString(ReservationStatus status);
+bool findMemberByID(string ID, int index);
 
 //File operation function Prototypes
 void loadAllData();
