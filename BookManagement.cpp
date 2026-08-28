@@ -80,7 +80,7 @@ void bookManagementMenu() {
 			cout << "Returning to main menu...\n";
 			break;
         default:
-            cout << "Invalid choice! Please enter 1-6.\n";
+            cout << "Invalid choice! Please enter 1-8.\n";
         }
     } while (choice != 8);
 }
@@ -331,6 +331,15 @@ void returnBook() {
     br.returnDate = getCurrentDate();
     br.isReturned = true;
     br.fineAmount = calculateFine(br.dueDate, br.returnDate);
+
+	//Award points
+    if (br.fineAmount == 0.0) {
+        int mIdx = -1;
+        if (findMemberByID(br.memberID, mIdx)) {
+            members[mIdx].rewardPoints += 5; // Adds 5 points for on-time returns
+            cout << "On-Time Return Bonus: Earned +5 Reward Points!\n";
+        }
+    }
 
     //Update book inventory
     for (auto& b : books) {
