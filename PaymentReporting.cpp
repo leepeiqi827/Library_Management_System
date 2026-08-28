@@ -14,9 +14,8 @@ void processFinePayment();
 void generateBorrowingReport();
 void generateOverdueReport();
 void displayBookCatalog();
-void generateMontlyReport();
+void generateMonthlyReport();
 double calculateFine(const string& dueDate, const string& returnDate);
-void dispalyPaymentHistory(const string& memberID);
 
 // =========================== Main Menu ===========================
 void paymentReportingMenu() {
@@ -57,7 +56,7 @@ void paymentReportingMenu() {
 			displayBookCatalog();
 			break;
 		case 5:
-			generateMontlyReport();
+			generateMonthlyReport();
 			break;
 		case 6:
 			cout << "Returning to main menu...";
@@ -81,6 +80,7 @@ void processFinePayment() {
 	int memberIndex = 0;
 	if (!findMemberByID(memberID, memberIndex)) {
 		cout << "member not found!" << endl;
+		pause();
 		return;
 	}
 
@@ -99,6 +99,7 @@ void processFinePayment() {
 
 	if (totalFine == 0.0) {
 		cout << "No outstanding fines for this member.";
+		pause();
 		return;
 	}
 
@@ -106,17 +107,26 @@ void processFinePayment() {
 	cout << "\n=============================================================================\n";
 	cout << "\t\tOutstanding Fines";
 	cout << "\n=============================================================================\n";
-	cout << left << setw(10) << "Record ID" << setw(12) << "Book ID" << setw(15) << "Due Date" << setw(15) << "Return Date" << setw(12) << "Fine (RM)\n";
+	cout << left << setw(10) << "Record ID" 
+		<< setw(12) << "Book ID" 
+		<< setw(15) << "Due Date" 
+		<< setw(15) << "Return Date" 
+		<< setw(12) << "Fine (RM)\n";
 	cout << "\n=============================================================================\n";
 	for (int records : fineIndices) {
 		const BorrowRecord& br = borrowRecords[records];
-		cout << left << setw(10) << br.recordID << setw(12) << br.bookID << setw(15) << br.dueDate << setw(15) << br.returnDate << setw(12) << fixed << setprecision(2) << br.fineAmount << endl;
+		cout << left << setw(10) << br.recordID 
+			<< setw(12) << br.bookID 
+			<< setw(15) << br.dueDate 
+			<< setw(15) << br.returnDate 
+			<< setw(12) << fixed << setprecision(2) << br.fineAmount << endl;
 
 	}
 	cout << "\n=============================================================================\n";
 	cout << "Total Fine: RM " << fixed << setprecision(2) << totalFine << endl;
 	cout << "\n=============================================================================\n";
 
+	//Get payment amount
 	double paymentAmount;
 	do {
 		cout << "Enter payment amount: RM ";
@@ -127,33 +137,54 @@ void processFinePayment() {
 			cout << "Inavlid payment amount! Please enter a positive number.";
 			continue;
 		}
-	} while (paymentAmount <= 0);
-	double remaining, outstandingFine,paid;
+		break;
+	} while (true);
+
+	//Calculate payment details
+	double remaining = 0, outstandingFine = 0,paid;
 	if (paymentAmount > totalFine) {
-		remaining = paymentAmount - totalFine;
 		paid = totalFine;
+		remaining = paymentAmount - totalFine;
 	}
 	else {
-		outstandingFine = totalFine - paymentAmount;
 		paid = paymentAmount;
+		outstandingFine = totalFine - paymentAmount;
 	}
 	
+	// Update borrow records (mark fines as paid)
+	double remainingToPay = paid;
+	for (int idx : fineIndices) {
+		if (remainingToPay <= 0) 
+			break;
+
+		BorrowRecord& br = borrowRecords[idx];
+		if (remainingToPay >= br.fineAmount) {
+			remainingToPay -= br.fineAmount;
+			br.fineAmount = 0;
+		}
+		else {
+			br.fineAmount -= remainingToPay;
+			remainingToPay = 0;
+		}
+	}
 
 	cout << "\n=============================================================================\n";
 	cout << "                                   Payment Receipt";
 	cout << "\n=============================================================================\n";
 	cout << "Member ID: " << memberID << endl;
+	cout << "Member Name: " << members[memberIndex].name << endl;
 	cout << "Payment Date: " << getCurrentDate() << endl;
-	cout << "Total: " << totalFine << endl;
-	cout << "Amount Paid: " << paymentAmount << endl;
-	if (paymentAmount > totalFine) {
-		cout << "Change: " << remaining << endl;
+	cout << "Total Fine: RM" << fixed << setprecision(2) << totalFine << endl;
+	cout << "Amount Paid: " << fixed << setprecision(2) << paymentAmount << endl;
+	if (remaining > 0) {
+		cout << "Change: " << fixed << setprecision(2) << remaining << endl;
 	}
-	else {
-		cout << "Outstanding Fine: " << outstandingFine << endl;
+	if (outstandingFine > 0) {
+		cout << "  Outstanding Fine: RM " << fixed << setprecision(2) << outstandingFine << endl;
 	}
 	cout << "\n=============================================================================\n";
 	cout << " Thank you for your payment!" << endl;
+	cout << "\n=============================================================================\n";
 
 	// update montly statistics
 	int month = stoi(getCurrentDate().substr(3, 2)) - 1;
@@ -195,7 +226,7 @@ void generateBorrowingReport() {
 			<< setw(10) << br.bookID
 			<< setw(12) << br.borrowDate
 			<< setw(12) << br.dueDate
-			<< setw(12) << br.returnDate
+			<< setw(12) << (br.isReturned ? br.returnDate : "-")
 			<< setw(10) << status
 			<< setw(12) << fixed << setprecision(2) << br.fineAmount << endl;
 
@@ -210,6 +241,7 @@ void generateBorrowingReport() {
 	cout << " Total Returned: " << totalReturned << endl;
 	cout << " Total Fines Collected: RM " << fixed << setprecision(2) << totalFines << endl;
 	cout << "\n=============================================================================\n";
+	pause();
 
 }
 
@@ -249,7 +281,8 @@ void generateOverdueReport() {
 						<< setw(12) << br.borrowDate
 						<< setw(12) << br.dueDate
 						<< setw(10) << daysLate
-						<< setw(12) << fixed << setprecision(2) << (daysLate * FINE_PER_DAY) << endl;
+						<< setw(12) << fixed << setprecision(2) 
+				<< (daysLate * FINE_PER_DAY) << endl;
 
 		}
 		
@@ -295,7 +328,7 @@ void displayBookCatalog() {
 }
 
 //Gnerate Montly Statistics
-void generateMontlyReport() {
+void generateMonthlyReport() {
 	cout << "\n=============================================================================\n";
 	cout << "                            Montly Statistics Report";
 	cout << "\n=============================================================================\n";
@@ -314,14 +347,15 @@ void generateMontlyReport() {
 			<< setw(18) << monthlyStats[i].booksBorrowed
 			<< setw(18) << monthlyStats[i].booksReturned
 			<< setw(18) << monthlyStats[i].reservationsMade
-			<< setw(18) << fixed << setprecision(2) << monthlyStats[i].finesCollected << endl;
+			<< setw(18) << fixed << setprecision(2) 
+			<< monthlyStats[i].finesCollected << endl;
 	}
 	cout << "\n=============================================================================\n";
 
 	int totalBorrowed = 0, totalReturned = 0, totalReservations = 0;
 	double totalFines = 0.0;
 	for (int i = 0; i < 12; i++) {
-		totalBorrowed += monthlyStats[i].booksReturned;
+		totalBorrowed += monthlyStats[i].booksBorrowed;
 		totalReturned += monthlyStats[i].booksReturned;
 		totalReservations += monthlyStats[i].reservationsMade;
 		totalFines += monthlyStats[i].finesCollected;
@@ -333,6 +367,7 @@ void generateMontlyReport() {
 		<< setw(18) << totalReservations
 		<< setw(18) << fixed << setprecision(2) << totalFines << endl;
 	cout << "\n=============================================================================\n";
+	pause();
 }
 
 //Calculate fine amount
@@ -346,7 +381,7 @@ double calculateFine(const string& dueDate, const string& returnDate) {
 }
 
 //Display payment history for a member
-void dispalyPaymentHistory(const string& memberID) {
+void displayPaymentHistory(const string& memberID) {
 	cout << "\n=============================================================================\n";
 	cout << "                                Payment History";
 	cout << "\n=============================================================================\n";

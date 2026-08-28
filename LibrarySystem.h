@@ -92,7 +92,12 @@ string membershipTypeToString(MembershipType type);
 MembershipType stringToMembershipType(const string& str);
 string bookStatusToString(BookStatus status);
 string reservationStatusToString(ReservationStatus status);
-bool findMemberByID(string ID, int index);
+
+//Find Function
+bool findMemberByID(const string& id, int& index);
+bool findBookByID(const string& id, int& index);
+bool findBorrowRecordByID(const string& id, int& index);
+bool findReservationByBookAndMember(const string& bookID, const string& memberID, int& index);
 
 //File operation function Prototypes
 void loadAllData();

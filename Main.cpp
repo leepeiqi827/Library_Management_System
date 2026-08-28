@@ -17,7 +17,6 @@ using namespace std;
 //Function Prototypes
 void displayMainMenu();
 void exitSystem();
-void initializeMonthlyStats();
 
 
 
@@ -26,6 +25,7 @@ int main() {
 
 	// Load data from files
 	loadAllData();
+	initializeMonthlyStats();
 
 	// Initialize monthly statistics if empty
 	initializeMonthlyStats();
@@ -67,7 +67,7 @@ int main() {
 
 void displayMainMenu() {
 	cout << "\n================================================\n";
-	cout << "            Library Management System\n";
+	cout << "            Library Management System";
 	cout << "\n================================================\n";
 	cout << endl;
 	cout << "\t1. Member Management\n";
