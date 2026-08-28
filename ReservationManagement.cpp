@@ -1,5 +1,6 @@
-// Reservation & Renewal Management
-// Team Member: Lim Zhi Yuan (25WMD04162)
+// ReservationManagement.cpp
+// Team Member: LIM ZHI YUAN (25WMD04162)
+// Module: Reservation & Renewal Management
 
 #include "LibrarySystem.h"
 #include <iostream>
@@ -8,7 +9,7 @@
 #include <algorithm>
 using namespace std;
 
-// Function prototypes
+// =========================== Function Prototypes ===========================
 void reserveBook();
 void renewBorrowing();
 void viewOverdueList();
@@ -19,544 +20,559 @@ bool isBookReservable(const string& bookID, string& errorMsg);
 bool canRenew(const string& recordID, string& errorMsg);
 void displayReservation(const Reservation& r);
 
-// ===================== Menu =====================
+// =========================== Main Menu ===========================
 void reservationManagementMenu() {
-	int choice;
-	do {
-		cout << "\n================================================\n";
-		cout << "        Reservation & Renewal Management\n";
-		cout << "================================================\n";
-		cout << endl;
-		cout << "\t1. Reserve a Book\n";
-		cout << "\t2. Renew a Borrowed Book\n";
-		cout << "\t3. View Overdue List\n";
-		cout << "\t4. Cancel a Reservation\n";
-		cout << "\t5. View My Reservations\n";
-		cout << "\t6. Back to Main Menu\n";
-		cout << "================================================\n";
-		cout << "\tEnter choice (1-6): ";
-		cin >> choice;
+    int choice;
+    do {
+        cout << "\n================================================\n";
+        cout << "        RESERVATION & RENEWAL MANAGEMENT";
+        cout << "\n================================================\n";
+        cout << endl;
+        cout << "   1. Reserve a Book\n";
+        cout << "   2. Renew a Borrowed Book\n";
+        cout << "   3. View Overdue List\n";
+        cout << "   4. Cancel a Reservation\n";
+        cout << "   5. View My Reservations\n";
+        cout << "   6. Back to Main Menu\n";
+        cout << "\n================================================\n";
+        cout << "Enter choice (1-6): ";
 
-		if (cin.fail()) {
-			cin.clear();
-			cout << "Invalid input! Please enter a number.\n";
-			continue;
-		}
+        cin >> choice;
+        if (cin.fail()) {
+            cin.clear();
+            cin.ignore(1000, '\n');
+            cout << "Invalid input! Please enter a number.\n";
+            continue;
+        }
+        cin.ignore(1000, '\n');
 
-		switch (choice) {
-		case 1:
-			reserveBook();
-			break;
-		case 2:
-			renewBorrowing();
-			break;
-		case 3:
-			viewOverdueList();
-			break;
-		case 4:
-			cancelReservation();
-			break;
-		case 5: 
-			viewMemberReservations();
-			break;
-		case 6: 
-			cout << "Returning to main menu...\n";
-			break;
-		default:
-			cout << "Invalid choice! Please enter 1-6.\n";
-
-		}
-	} while (choice != 6);
-
+        switch (choice) {
+        case 1:
+            reserveBook();
+            break;
+        case 2:
+            renewBorrowing();
+            break;
+        case 3:
+            viewOverdueList();
+            break;
+        case 4:
+            cancelReservation();
+            break;
+        case 5:
+            viewMemberReservations();
+            break;
+        case 6:
+            cout << "Returning to main menu...\n";
+            break;
+        default:
+            cout << "Invalid choice! Please enter 1-6.\n";
+        }
+    } while (choice != 6);
 }
 
-// ===================== 1. Reserve a Book =====================
+// =========================== 1. Reserve a Book ===========================
 void reserveBook() {
-	cout << "\n---------- [Reserve a Book] ----------";
+    cout << "\n================================================\n";
+    cout << "              RESERVE A BOOK";
+    cout << "\n================================================\n";
 
-	string memberID;
-	cout << "Enter Member ID: ";
-	cin >> memberID;
+    string memberID;
+    cout << "Enter Member ID: ";
+    cin >> memberID;
 
-	int memberIndex;
-	if (!findMemberByID(memberID, memberIndex)) {
-		cout << "Error: Member not found!\n";
-		pause();
-		return;
-	}
+    int memberIndex;
+    if (!findMemberByID(memberID, memberIndex)) {
+        cout << "Error: Member not found!\n";
+        pause();
+        return;
+    }
 
-	if (!members[memberIndex].isActive) {
-		cout << "Error: This member account is INACTIVE!\n";
-		pause();
-		return;
-	}
+    if (!members[memberIndex].isActive) {
+        cout << "Error: This member account is INACTIVE!\n";
+        pause();
+        return;
+    }
 
-	if (!canMemberReserve(memberID)) {
-		pause();
-		return;
-	}
+    if (!canMemberReserve(memberID)) {
+        pause();
+        return;
+    }
 
-	int bookIndex;
-	if (!findBookByID(bookID, bookIndex)) {
-		cout << "Error: Book not found!\n";
-		pause();
-		return;
-	}
+    string bookID;
+    cout << "Enter Book ID: ";
+    cin >> bookID;
 
-	string errorMsg;
-	if (!isBookReservable(bookID, errorMsg)) {
-		cout << "Error: " << errorMsg << endl;
-		pause();
-		return;
-	}
+    int bookIndex;
+    if (!findBookByID(bookID, bookIndex)) {
+        cout << "Error: Book not found!\n";
+        pause();
+        return;
+    }
 
-	int existingIndex;
-	if (findReservationByBookAndMember(bookID, memberID, existingIndex)) {
-		cout << "Error: You already have a pending reservation for this book!\n";
-		pause();
-		return;
-	}
+    string errorMsg;
+    if (!isBookReservable(bookID, errorMsg)) {
+        cout << "Error: " << errorMsg << endl;
+        pause();
+        return;
+    }
 
-	Reservation newRes;
-	newRes.reservationID = generateID("R", reservations.size() + 1);
-	newRes.bookID = bookID;
-	newRes.memberID = memberID;
-	newRes.reservationDate = getCurrentDate();
-	newRes.status = PENDING;
+    int existingIndex;
+    if (findReservationByBookAndMember(bookID, memberID, existingIndex)) {
+        cout << "Error: You already have a pending reservation for this book!\n";
+        pause();
+        return;
+    }
 
-	reservations.push_back(newRes);
+    Reservation newRes;
+    newRes.reservationID = generateID("R", reservations.size() + 1);
+    newRes.bookID = bookID;
+    newRes.memberID = memberID;
+    newRes.reservationDate = getCurrentDate();
+    newRes.status = PENDING;
 
-	// Update book status if all copies are borrowed
-	if (books[bookIndex].availableCopies == 0) {
-		books[bookIndex].status = RESERVED;
-	}
+    reservations.push_back(newRes);
 
-	// Update monthly statistics
-	string currentDate = getCurrentDate();
-	int month = stoi(currentDate.substr(3, 2)) - 1;
-	if (month >= 0 && month < 12) {
-		monthlyStats[month].reservationsMade++;
-	}
+    // Update book status if all copies are borrowed
+    if (books[bookIndex].availableCopies == 0) {
+        books[bookIndex].status = RESERVED;
+    }
 
-	saveReservations();
-	saveBooks();
+    // Update monthly statistics
+    string currentDate = getCurrentDate();
+    int month = stoi(currentDate.substr(3, 2)) - 1;
+    if (month >= 0 && month < 12) {
+        monthlyStats[month].reservationsMade++;
+    }
 
-	cout << "RESERVATION SUCCESSFUL!\n";
-	cout << "-----------------------\n";
-	cout << "Reservation ID: " << newRes.reservationID << endl;
-	cout << "Book Title: " << books[bookIndex].title << endl;
-	cout << "Reservation Date: " << newRes.reservationDate << endl;
-	cout << "Status: PENDING\n";
-	cout << "You will be notified when the book becomes available.\n";
+    saveReservations();
+    saveBooks();
 
-	pause();
+    cout << "\n================================================\n";
+    cout << "           RESERVATION SUCCESSFUL!";
+    cout << "\n================================================\n";
+    cout << "Reservation ID: " << newRes.reservationID << endl;
+    cout << "Book Title: " << books[bookIndex].title << endl;
+    cout << "Reservation Date: " << newRes.reservationDate << endl;
+    cout << "Status: PENDING\n";
+    cout << "You will be notified when the book becomes available.\n";
+    cout << "================================================\n";
 
+    pause();
 }
 
-// ===================== 2. Renew a Borrowed Book =====================
+// =========================== 2. Renew a Borrowed Book ===========================
 void renewBorrowing() {
-	cout << "\n---------- [Renew a Borrowed Book] ----------";
+    cout << "\n================================================\n";
+    cout << "              RENEW A BORROWED BOOK";
+    cout << "\n================================================\n";
 
-	string recordID;
-	cout << "Enter Borrow Record ID: ";
-	cin >> recordID;
+    string recordID;
+    cout << "Enter Borrow Record ID: ";
+    cin >> recordID;
 
-	int recordIndex;
-	if (!findBorrowRecordByID(recordID, recordIndex)) {
-		cout << "Error: Borrow record not found!\n";
-		pause();
-		return;
-	}
+    int recordIndex;
+    if (!findBorrowRecordByID(recordID, recordIndex)) {
+        cout << "Error: Borrow record not found!\n";
+        pause();
+        return;
+    }
 
-	BorrowRecord& br = borrowRecords[recordIndex];
+    BorrowRecord& br = borrowRecords[recordIndex];
 
-	if (br.isReturned) {
-		cout << "Error: This book has already been returned.\n";
-		pause();
-		return;
-	}
+    if (br.isReturned) {
+        cout << "Error: This book has already been returned.\n";
+        pause();
+        return;
+    }
 
-	string errorMsg;
-	if (!canRenew(recordID, errorMsg)) {
-		cout << "Error: " << errorMsg << endl;
-		pause();
-		return;
-	}
+    string errorMsg;
+    if (!canRenew(recordID, errorMsg)) {
+        cout << "Error: " << errorMsg << endl;
+        pause();
+        return;
+    }
 
-	// Perform renewal
-	br.renewalCount++;
-	br.dueDate = getDateFromDays(BORROW_DURATION_DAYS);
+    // Perform renewal
+    br.renewalCount++;
+    br.dueDate = getDateFromDays(BORROW_DURATION_DAYS);
 
-	// Update monthly statistics
-	string currentDate = getCurrentDate();
-	int month = stoi(currentDate.substr(3, 2)) - 1;
-	if (month >= 0 && month < 12) {
-		monthlyStats[month].booksBorrowed++;
-	}
+    // Update monthly statistics
+    string currentDate = getCurrentDate();
+    int month = stoi(currentDate.substr(3, 2)) - 1;
+    if (month >= 0 && month < 12) {
+        monthlyStats[month].booksBorrowed++;
+    }
 
-	saveBorrowRecords();
+    saveBorrowRecords();
 
-	cout << "RENEWAL SUCCESSFUL!\n";
-	cout << "-------------------\n";
-	cout << "Record ID: " << br.recordID << endl;
-	cout << "New Due Date: " << br.dueDate << endl;
-	cout << "Renewal Count: " << br.renewalCount << " / " << MAX_RENEWALS << endl;
-	cout << "\n--------------------------------------------------\n";
+    cout << "\n================================================\n";
+    cout << "           RENEWAL SUCCESSFUL!";
+    cout << "\n================================================\n";
+    cout << "Record ID: " << br.recordID << endl;
+    cout << "New Due Date: " << br.dueDate << endl;
+    cout << "Renewal Count: " << br.renewalCount << " / " << MAX_RENEWALS << endl;
+    cout << "================================================\n";
 
-	pause();
-
+    pause();
 }
 
-// ===================== 3. View Overdue List =====================
+// =========================== 3. View Overdue List ===========================
 void viewOverdueList() {
-	cout << "\n---------- [Overdue Books List] ----------";
+    cout << "\n================================================\n";
+    cout << "              OVERDUE BOOKS LIST";
+    cout << "\n================================================\n";
 
-	string currentDate = getCurrentDate();
-	bool found = false;
+    string currentDate = getCurrentDate();
+    bool found = false;
 
-	cout << left << setw(12) << "Member ID"
-		<< setw(25) << "Member Name"
-		<< setw(10) << "Book ID"
-		<< setw(20) << "Book Title"
-		<< setw(12) << "Due Date"
-		<< setw(10) << "Days Late"
-		<< setw(12) << "Fine (RM)" << endl;
-	cout << string(101, '-') << endl;
+    cout << left << setw(12) << "Member ID"
+        << setw(25) << "Member Name"
+        << setw(10) << "Book ID"
+        << setw(20) << "Book Title"
+        << setw(12) << "Due Date"
+        << setw(10) << "Days Late"
+        << setw(12) << "Fine (RM)" << endl;
+    cout << string(101, '-') << endl;
 
-	for (const auto& br : borrowRecords) {
-		if (br.isReturned) continue;
+    for (const auto& br : borrowRecords) {
+        if (br.isReturned) continue;
 
-		int daysLate = calculateDaysDifference(currentDate, br.dueDate);
+        int daysLate = calculateDaysDifference(currentDate, br.dueDate);
 
-		if (daysLate > 0) {
-			found = true;
+        if (daysLate > 0) {
+            found = true;
 
-			int memberIndex;
-			string memberName = "Unknown";
-			if (findMemberByID(br.memberID, memberIndex)) {
-				memberName = members[memberIndex].name;
-			}
+            int memberIndex;
+            string memberName = "Unknown";
+            if (findMemberByID(br.memberID, memberIndex)) {
+                memberName = members[memberIndex].name;
+            }
 
-			int bookIndex;
-			string bookTitle = "Unknown";
-			if (findBookByID(br.bookID, bookIndex)) {
-				bookTitle = books[bookIndex].title;
-			}
+            int bookIndex;
+            string bookTitle = "Unknown";
+            if (findBookByID(br.bookID, bookIndex)) {
+                bookTitle = books[bookIndex].title;
+            }
 
-			double fine = daysLate * FINE_PER_DAY;
+            double fine = daysLate * FINE_PER_DAY;
 
-			cout << left << setw(12) << br.memberID
-				<< setw(25) << memberName
-				<< setw(10) << br.bookID
-				<< setw(20) << bookTitle
-				<< setw(12) << br.dueDate
-				<< setw(10) << daysLate
-				<< setw(12) << fixed << setprecision(2) << fine << endl;
-		}
-	}
+            cout << left << setw(12) << br.memberID
+                << setw(25) << memberName
+                << setw(10) << br.bookID
+                << setw(20) << bookTitle
+                << setw(12) << br.dueDate
+                << setw(10) << daysLate
+                << setw(12) << fixed << setprecision(2) << fine << endl;
+        }
+    }
 
-	if (!found)
-		cout << "\nNo overdue books found. All books are on time!\n";
+    if (!found) {
+        cout << "\nNo overdue books found. All books are on time!\n";
+    }
 
-	cout << "\n--------------------------------------------------\n";
-	pause();
-
+    cout << "\n================================================\n";
+    pause();
 }
 
-// ===================== 4. Cancel a Reservation =====================
+// =========================== 4. Cancel a Reservation ===========================
 void cancelReservation() {
-	cout << "\n---------- [Cancel Reservation] ----------";
+    cout << "\n================================================\n";
+    cout << "              CANCEL RESERVATION";
+    cout << "\n================================================\n";
 
-	string memberID;
-	cout << "Enter Member ID: ";
-	cin >> memberID;
+    string memberID;
+    cout << "Enter Member ID: ";
+    cin >> memberID;
 
-	int memberIndex;
-	if (!findMemberByID(memberID, memberIndex)) {
-		cout << "Error: Member not found!\n";
-		pause();
-		return;
-	}
+    int memberIndex;
+    if (!findMemberByID(memberID, memberIndex)) {
+        cout << "Error: Member not found!\n";
+        pause();
+        return;
+    }
 
-	string bookID;
-	cout << "Enter Book ID to cancel reservation: ";
-	cin >> bookID;
+    string bookID;
+    cout << "Enter Book ID to cancel reservation: ";
+    cin >> bookID;
 
-	int reservationIndex;
-	if (!findReservationByBookAndMember(bookID, memberID, reservationIndex)) {
-		cout << "Error: No pending reservation found for this member and book.\n";
-		pause();
-		return;
-	}
+    int reservationIndex;
+    if (!findReservationByBookAndMember(bookID, memberID, reservationIndex)) {
+        cout << "Error: No pending reservation found for this member and book.\n";
+        pause();
+        return;
+    }
 
-	char confirm;
-	cout << "Are you sure you want to cancel this reservation? (y/n): ";
-	cin >> confirm;
+    char confirm;
+    cout << "Are you sure you want to cancel this reservation? (y/n): ";
+    cin >> confirm;
 
-	if (tolower(confirm) != 'y') {
-		cout << "Cancellation aborted.\n";
-		pause();
-		return;
-	}
+    if (tolower(confirm) != 'y') {
+        cout << "Cancellation aborted.\n";
+        pause();
+        return;
+    }
 
-	reservations[reservationIndex].status = CANCELLED;
+    reservations[reservationIndex].status = CANCELLED;
 
-	// Check if there are any other pending reservations for this book
-	bool hasOtherReservations = false;
-	for (const auto& r : reservations) {
-		if (r.bookID == bookID && r.status == PENDING) {
-			hasOtherReservations = true;
-			break;
-		}
-	}
+    // Check if there are any other pending reservations for this book
+    bool hasOtherReservations = false;
+    for (const auto& r : reservations) {
+        if (r.bookID == bookID && r.status == PENDING) {
+            hasOtherReservations = true;
+            break;
+        }
+    }
 
-	if (!hasOtherReservations) {
-		int bookIndex;
-		if (findBookByID(bookID, bookIndex)) {
-			if (books[bookIndex].availableCopies == 0) {
-				books[bookIndex].status = BORROWED;
-			}
-		}
-	}
+    if (!hasOtherReservations) {
+        int bookIndex;
+        if (findBookByID(bookID, bookIndex)) {
+            if (books[bookIndex].availableCopies == 0) {
+                books[bookIndex].status = BORROWED;
+            }
+        }
+    }
 
-	saveReservations();
-	saveBooks();
+    saveReservations();
+    saveBooks();
 
-	cout << "RESERVATION CANCELLED SUCCESSFULLY";
-	cout << "----------------------------------";
-	cout << "Reservation for book " << bookID << " has been cancelled.\n";
-	cout << "\n--------------------------------------------------\n";
+    cout << "\n================================================\n";
+    cout << "           RESERVATION CANCELLED SUCCESSFULLY";
+    cout << "\n================================================\n";
+    cout << "Reservation for book " << bookID << " has been cancelled.\n";
+    cout << "================================================\n";
 
-	pause();
-
+    pause();
 }
 
-// ===================== 5. View Member Reservations =====================
-void cancelReservation() {
-	cout << "\n---------- [My Reservations] ----------";
+// =========================== 5. View Member Reservations ===========================
+void viewMemberReservations() {
+    cout << "\n================================================\n";
+    cout << "              MY RESERVATIONS";
+    cout << "\n================================================\n";
 
-	string memberID;
-	cout << "Enter Member ID: ";
-	cin >> memberID;
+    string memberID;
+    cout << "Enter Member ID: ";
+    cin >> memberID;
 
-	int memberIndex;
-	if (!findMemberByID(memberID, memberIndex)) {
-		cout << "Error: Member not found!\n";
-		pause();
-		return;
-	}
+    int memberIndex;
+    if (!findMemberByID(memberID, memberIndex)) {
+        cout << "Error: Member not found!\n";
+        pause();
+        return;
+    }
 
-	bool found = false;
-	cout << left << setw(14) << "Reservation ID"
-		<< setw(10) << "Book ID"
-		<< setw(35) << "Book Title"
-		<< setw(14) << "Date"
-		<< setw(12) << "Status" << endl;
-	cout << string(85, '-') << endl;
+    bool found = false;
+    cout << left << setw(14) << "Reservation ID"
+        << setw(10) << "Book ID"
+        << setw(35) << "Book Title"
+        << setw(14) << "Date"
+        << setw(12) << "Status" << endl;
+    cout << string(85, '-') << endl;
 
-	for (const auto& r : reservations) {
-		if (r.memberID != memberID) continue;
+    for (const auto& r : reservations) {
+        if (r.memberID != memberID) continue;
 
-		found = true;
-		string bookTitle = "Unknown";
-		int bookIndex;
-		if (findBookByID(r.bookID, bookIndex)) {
-			bookTitle = books[bookIndex].title;
-		}
+        found = true;
+        string bookTitle = "Unknown";
+        int bookIndex;
+        if (findBookByID(r.bookID, bookIndex)) {
+            bookTitle = books[bookIndex].title;
+        }
 
-		cout << left << setw(14) << r.reservationID
-			<< setw(10) << r.bookID
-			<< setw(35) << bookTitle
-			<< setw(14) << r.reservationDate
-			<< setw(12) << reservationStatusToString(r.status) << endl;
-	}
+        cout << left << setw(14) << r.reservationID
+            << setw(10) << r.bookID
+            << setw(35) << bookTitle
+            << setw(14) << r.reservationDate
+            << setw(12) << reservationStatusToString(r.status) << endl;
+    }
 
-	if (!found) {
-		cout << "\nNo reservations found for this member.\n";
-	}
-	cout << "\n--------------------------------------------------\n";
+    if (!found) {
+        cout << "\nNo reservations found for this member.\n";
+    }
 
-	pause();
+    cout << "\n================================================\n";
+    pause();
 }
 
 // =========================== Helper Functions ===========================
 
 bool canMemberReserve(const string& memberID) {
-	string currentDate = getCurrentDate();
-	int overdueCount = 0;
+    string currentDate = getCurrentDate();
+    int overdueCount = 0;
 
-	for (const auto& br : borrowRecords) {
-		if (br.memberID == memberID && !br.isReturned) {
-			int daysLate = calculateDaysDifference(currentDate, br.dueDate);
-			if (daysLate > 0) {
-				overdueCount++;
-			}
-		}
-	}
+    for (const auto& br : borrowRecords) {
+        if (br.memberID == memberID && !br.isReturned) {
+            int daysLate = calculateDaysDifference(currentDate, br.dueDate);
+            if (daysLate > 0) {
+                overdueCount++;
+            }
+        }
+    }
 
-	if (overdueCount > 0) {
-		cout << "Error: Member has " << overdueCount << " overdue book(s). "
-			<< "Please return all overdue books before making a reservation.\n";
-		return false;
-	}
+    if (overdueCount > 0) {
+        cout << "Error: Member has " << overdueCount << " overdue book(s). "
+            << "Please return all overdue books before making a reservation.\n";
+        return false;
+    }
 
-	int activeBorrows = 0;
-	for (const auto& br : borrowRecords) {
-		if (br.memberID == memberID && !br.isReturned) {
-			activeBorrows++;
-		}
-	}
+    int activeBorrows = 0;
+    for (const auto& br : borrowRecords) {
+        if (br.memberID == memberID && !br.isReturned) {
+            activeBorrows++;
+        }
+    }
 
-	// Check if member has reached borrowing limit (including bonus limit from Member struct)
-	int memberIndex;
-	int allowedLimit = MAX_BORROW_LIMIT;
-	if (findMemberByID(memberID, memberIndex)) {
-		allowedLimit = MAX_BORROW_LIMIT + members[memberIndex].bonusBorrowLimit;
-	}
+    // Check if member has reached borrowing limit (including bonus limit from Member struct)
+    int memberIndex;
+    int allowedLimit = MAX_BORROW_LIMIT;
+    if (findMemberByID(memberID, memberIndex)) {
+        allowedLimit = MAX_BORROW_LIMIT + members[memberIndex].bonusBorrowLimit;
+    }
 
-	if (activeBorrows >= allowedLimit) {
-		cout << "Error: Member has reached maximum borrowing limit ("
-			<< allowedLimit << " books).\n";
-		return false;
-	}
+    if (activeBorrows >= allowedLimit) {
+        cout << "Error: Member has reached maximum borrowing limit ("
+            << allowedLimit << " books).\n";
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool isBookReservable(const string& bookID, string& errorMsg) {
-	int bookIndex;
-	if (!findBookByID(bookID, bookIndex)) {
-		errorMsg = "Book not found.";
-		return false;
-	}
+    int bookIndex;
+    if (!findBookByID(bookID, bookIndex)) {
+        errorMsg = "Book not found.";
+        return false;
+    }
 
-	const Book& b = books[bookIndex];
+    const Book& b = books[bookIndex];
 
-	if (b.status == LOST) {
-		errorMsg = "This book is marked as LOST and cannot be reserved.";
-		return false;
-	}
+    if (b.status == LOST) {
+        errorMsg = "This book is marked as LOST and cannot be reserved.";
+        return false;
+    }
 
-	if (b.availableCopies > 0) {
-		errorMsg = "This book is currently available. Please borrow it directly.";
-		return false;
-	}
+    if (b.availableCopies > 0) {
+        errorMsg = "This book is currently available. Please borrow it directly.";
+        return false;
+    }
 
-	if (b.totalCopies == 0) {
-		errorMsg = "This book has no copies in the library.";
-		return false;
-	}
+    if (b.totalCopies == 0) {
+        errorMsg = "This book has no copies in the library.";
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool canRenew(const string& recordID, string& errorMsg) {
-	int recordIndex;
-	if (!findBorrowRecordByID(recordID, recordIndex)) {
-		errorMsg = "Borrow record not found.";
-		return false;
-	}
+    int recordIndex;
+    if (!findBorrowRecordByID(recordID, recordIndex)) {
+        errorMsg = "Borrow record not found.";
+        return false;
+    }
 
-	const BorrowRecord& br = borrowRecords[recordIndex];
+    const BorrowRecord& br = borrowRecords[recordIndex];
 
-	if (br.isReturned) {
-		errorMsg = "This book has already been returned.";
-		return false;
-	}
+    if (br.isReturned) {
+        errorMsg = "This book has already been returned.";
+        return false;
+    }
 
-	if (br.renewalCount >= MAX_RENEWALS) {
-		errorMsg = "Maximum renewal limit (" + to_string(MAX_RENEWALS) + ") reached.";
-		return false;
-	}
+    if (br.renewalCount >= MAX_RENEWALS) {
+        errorMsg = "Maximum renewal limit (" + to_string(MAX_RENEWALS) + ") reached.";
+        return false;
+    }
 
-	string currentDate = getCurrentDate();
-	int daysLate = calculateDaysDifference(currentDate, br.dueDate);
-	if (daysLate > 0) {
-		errorMsg = "This book is overdue by " + to_string(daysLate) +
-			" days. Please return it first.";
-		return false;
-	}
+    string currentDate = getCurrentDate();
+    int daysLate = calculateDaysDifference(currentDate, br.dueDate);
+    if (daysLate > 0) {
+        errorMsg = "This book is overdue by " + to_string(daysLate) +
+            " days. Please return it first.";
+        return false;
+    }
 
-	// Check if there are pending reservations for this book
-	for (const auto& r : reservations) {
-		if (r.bookID == br.bookID && r.status == PENDING) {
-			errorMsg = "This book has pending reservations. Cannot renew.";
-			return false;
-		}
-	}
+    // Check if there are pending reservations for this book
+    for (const auto& r : reservations) {
+        if (r.bookID == br.bookID && r.status == PENDING) {
+            errorMsg = "This book has pending reservations. Cannot renew.";
+            return false;
+        }
+    }
 
-	return true;
+    return true;
 }
 
 // =========================== Process Reservation Queue ===========================
 // This function is called by returnBook() in Book Management module
 void processReservationQueue(const string& bookID) {
-	// Find the first pending reservation for this book
-	int firstReservationIndex = -1;
-	for (size_t i = 0; i < reservations.size(); i++) {
-		if (reservations[i].bookID == bookID &&
-			reservations[i].status == PENDING) {
-			firstReservationIndex = i;
-			break;
-		}
-	}
+    // Find the first pending reservation for this book
+    int firstReservationIndex = -1;
+    for (size_t i = 0; i < reservations.size(); i++) {
+        if (reservations[i].bookID == bookID &&
+            reservations[i].status == PENDING) {
+            firstReservationIndex = i;
+            break;
+        }
+    }
 
-	if (firstReservationIndex == -1) {
-		return;
-	}
+    if (firstReservationIndex == -1) {
+        return;
+    }
 
-	int bookIndex;
-	if (!findBookByID(bookID, bookIndex)) {
-		return;
-	}
+    int bookIndex;
+    if (!findBookByID(bookID, bookIndex)) {
+        return;
+    }
 
-	// Mark reservation as fulfilled
-	Reservation& r = reservations[firstReservationIndex];
-	r.status = FULFILLED;
+    // Mark reservation as fulfilled
+    Reservation& r = reservations[firstReservationIndex];
+    r.status = FULFILLED;
 
-	// Create a borrow record for the first person in queue
-	BorrowRecord newBr;
-	newBr.recordID = generateID("B", borrowRecords.size() + 1);
-	newBr.memberID = r.memberID;
-	newBr.bookID = bookID;
-	newBr.borrowDate = getCurrentDate();
-	newBr.dueDate = getDateFromDays(BORROW_DURATION_DAYS);
-	newBr.returnDate = "-";
-	newBr.isReturned = false;
-	newBr.fineAmount = 0.0;
-	newBr.renewalCount = 0;
+    // Create a borrow record for the first person in queue
+    BorrowRecord newBr;
+    newBr.recordID = generateID("B", borrowRecords.size() + 1);
+    newBr.memberID = r.memberID;
+    newBr.bookID = bookID;
+    newBr.borrowDate = getCurrentDate();
+    newBr.dueDate = getDateFromDays(BORROW_DURATION_DAYS);
+    newBr.returnDate = "-";
+    newBr.isReturned = false;
+    newBr.fineAmount = 0.0;
+    newBr.renewalCount = 0;
 
-	borrowRecords.push_back(newBr);
+    borrowRecords.push_back(newBr);
 
-	// Update member's borrowed count
-	int memberIndex;
-	if (findMemberByID(r.memberID, memberIndex)) {
-		members[memberIndex].borrowedCount++;
-	}
+    // Update member's borrowed count
+    int memberIndex;
+    if (findMemberByID(r.memberID, memberIndex)) {
+        members[memberIndex].borrowedCount++;
+    }
 
-	// Decrease available copies (since this copy is now borrowed)
-	books[bookIndex].availableCopies--;
-	if (books[bookIndex].availableCopies == 0) {
-		books[bookIndex].status = BORROWED;
-	}
+    // Decrease available copies (since this copy is now borrowed)
+    books[bookIndex].availableCopies--;
+    if (books[bookIndex].availableCopies == 0) {
+        books[bookIndex].status = BORROWED;
+    }
 
-	// Update monthly statistics
-	string currentDate = getCurrentDate();
-	int month = stoi(currentDate.substr(3, 2)) - 1;
-	if (month >= 0 && month < 12) {
-		monthlyStats[month].booksBorrowed++;
-		monthlyStats[month].reservationsMade++;
-	}
+    // Update monthly statistics
+    string currentDate = getCurrentDate();
+    int month = stoi(currentDate.substr(3, 2)) - 1;
+    if (month >= 0 && month < 12) {
+        monthlyStats[month].booksBorrowed++;
+        monthlyStats[month].reservationsMade++;
+    }
 
-	saveReservations();
-	saveBorrowRecords();
-	saveBooks();
+    saveReservations();
+    saveBorrowRecords();
+    saveBooks();
 
-	cout << "\n================================================\n";
-	cout << "     RESERVATION QUEUE PROCESSED";
-	cout << "\n================================================\n";
-	cout << "Book has been automatically issued to: " << r.memberID << endl;
-	cout << "New Borrow Record ID: " << newBr.recordID << endl;
-	cout << "Due Date: " << newBr.dueDate << endl;
-	cout << "================================================\n";
+    cout << "\n================================================\n";
+    cout << "     RESERVATION QUEUE PROCESSED";
+    cout << "\n================================================\n";
+    cout << "Book has been automatically issued to: " << r.memberID << endl;
+    cout << "New Borrow Record ID: " << newBr.recordID << endl;
+    cout << "Due Date: " << newBr.dueDate << endl;
+    cout << "================================================\n";
 }
