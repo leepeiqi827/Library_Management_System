@@ -33,6 +33,8 @@ struct Member {
 	string contact;
 	string password;
 	MembershipType membershipType;
+	int rewardPoints = 0;
+	int bonusBorrowLimit = 0;
 	int borrowedCount;
 	bool isActive;
 };
