@@ -82,7 +82,7 @@ void bookManagementMenu() {
         default:
             cout << "Invalid choice! Please enter 1-6.\n";
         }
-    } while (choice != 6);
+    } while (choice != 8);
 }
 
 //Add new book title
