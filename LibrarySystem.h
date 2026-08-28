@@ -95,6 +95,7 @@ MembershipType stringToMembershipType(const string& str);
 string bookStatusToString(BookStatus status);
 string reservationStatusToString(ReservationStatus status);
 double calculateFine(const string& dueDate, const string& returnDate);
+void processReservationQueue(const string& bookID);
 
 //Find Function
 bool findMemberByID(const string& id, int& index);
