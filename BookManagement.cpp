@@ -306,11 +306,23 @@ void borrowBook() {
     }
 }
 
+
+double calculateFine(const string& dueDate, const string& returnDate) {
+    int daysLate = calculateDaysDifference(dueDate, returnDate);
+    if (daysLate > 0) {
+        return daysLate * FINE_PER_DAY;
+    }
+    return 0.0;
+}
+
+
 //Return book
 void returnBook() {
     cout << "\n================================================\n";
     cout << "\t\tReturn Book";
     cout << "\n================================================\n";
+
+
 
     string recordID = getLineInput("Enter Borrow Record ID: ");
     int recIndex = -1;
@@ -336,7 +348,7 @@ void returnBook() {
     if (br.fineAmount == 0.0) {
         int mIdx = -1;
         if (findMemberByID(br.memberID, mIdx)) {
-            members[mIdx].rewardPoints += 5; // Adds 5 points for on-time returns
+            members[mIdx].rewardPoints += 5; //add 5 points 
             cout << "On-Time Return Bonus: Earned +5 Reward Points!\n";
         }
     }
