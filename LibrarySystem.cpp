@@ -25,14 +25,31 @@ string generateID(const string& prefix, int number) {
 	return ss.str();
 }
 
-//Get current date as string
+//Get current date as string (DD/MM/YYYY)
 string getCurrentDate() {
-	return "q";
+	time_t now = time(nullptr);
+	tm* localTime = localtime(&now);
+
+	stringstream ss;
+	ss << setw(2) << setfill('0') << localTime->tm_mday << "/"
+		<< setw(2) << setfill('0') << (localTime->tm_mon + 1) << "/"
+		<< (localTime->tm_year + 1900);
+
+	return ss.str();
 }
 
-//Get date offset by days
+//Get date offset by days (DD/MM/YYYY)
 string getDateFromDays(int daysOffset) {
-	return "q";
+	time_t now = time(nullptr);
+	now += daysOffset * 24 * 60 * 60;
+	tm* localTime = localtime(&now);
+
+	stringstream ss;
+	ss << setw(2) << setfill('0') << localTime->tm_mday << "/"
+		<< setw(2) << setfill('0') << (localTime->tm_mon + 1) << "/"
+		<< (localTime->tm_year + 1900);
+
+	return ss.str();
 }
 
 //Calculate days differnt between two dates
