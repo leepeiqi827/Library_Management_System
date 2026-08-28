@@ -154,17 +154,26 @@ void updateBook() {
         input = getLineInput("New Category: ");
         if (!input.empty()) books[targetIndex].category = input;
 
-        cout << "New Total Copies (-1 to keep current): ";
-        int newCopies;
-        cin >> newCopies;
-        if (!cin.fail() && newCopies >= 0) {
-            int copyDiff = newCopies - books[targetIndex].totalCopies;
-            books[targetIndex].totalCopies = newCopies;
-            books[targetIndex].availableCopies += copyDiff;
-            if (books[targetIndex].availableCopies < 0) books[targetIndex].availableCopies = 0;
+        string copiesInput = getLineInput("New Total Copies (leave blank to keep current): ");
+        if (!copiesInput.empty()) {
+            try {
+                int newCopies = stoi(copiesInput);
+                if (newCopies >= 0) {
+                    int copyDiff = newCopies - books[targetIndex].totalCopies;
+                    books[targetIndex].totalCopies = newCopies;
+                    books[targetIndex].availableCopies += copyDiff;
+                    if (books[targetIndex].availableCopies < 0) {
+                        books[targetIndex].availableCopies = 0;
+                    }
+                }
+                else {
+                    cout << "Invalid copy count! Total copies left unchanged.\n";
+                }
+            }
+            catch (const invalid_argument&) {
+                cout << "Invalid input format! Total copies left unchanged.\n";
+            }
         }
-        cin.clear();
-        cin.ignore(1000, '\n');
 
         saveBooks();
         cout << "Book updated successfully!\n";
