@@ -20,11 +20,11 @@ void pause() {
 }
 
 void clearScreen() {
-	#ifdef _WIN32
-		system("cls");
-	#else
-		system("clear");
-	#endif
+#ifdef _WIN32
+	system("cls");
+#else
+	system("clear");
+#endif
 }
 
 //Generate unique ID
@@ -49,6 +49,20 @@ string getCurrentDate() {
 	return ss.str();
 }
 
+//Get days in a month (handles leap years)
+int daysInMonth(int month, int year) {
+	if (month == 2) {
+		if ((year % 400 == 0) || (year % 4 == 0 && year % 100 != 0)) {
+			return 29;
+		}
+		return 28;
+	}
+	if (month == 4 || month == 6 || month == 9 || month == 11) {
+		return 30;
+	}
+	return 31;
+}
+
 //Get date offset by days (DD/MM/YYYY)
 string getDateFromDays(int daysOffset) {
 	time_t now = time(nullptr);
@@ -62,6 +76,34 @@ string getDateFromDays(int daysOffset) {
 		<< setw(2) << setfill('0') << (localTime.tm_mon + 1) << "/"
 		<< (localTime.tm_year + 1900);
 
+	return ss.str();
+}
+
+//Add days to a date string (DD/MM/YYYY)
+string addDaysToDate(const string& date, int days) {
+	//Parse date
+	int day = stoi(date.substr(0, 2));
+	int month = stoi(date.substr(3, 2));
+	int year = stoi(date.substr(6, 4));
+
+	//Add days
+	day += days;
+
+	//Handle month/year overflow
+	while (day > daysInMonth(month, year)) {
+		day -= daysInMonth(month, year);
+		month++;
+		if (month > 12) {
+			month = 1;
+			year++;
+		}
+	}
+
+	//Format back to DD/MM/YYYY
+	stringstream ss;
+	ss << setw(2) << setfill('0') << day << "/"
+		<< setw(2) << setfill('0') << month << "/"
+		<< year;
 	return ss.str();
 }
 
@@ -79,16 +121,16 @@ int calculateDaysDifference(const string& date1, const string& date2) {
 	int daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 	int total1 = 0;
-	for (int y = 0; y < y1; y++) 
+	for (int y = 0; y < y1; y++)
 		total1 += 365;
-	for (int m = 0; m < m1 - 1; m++) 
+	for (int m = 0; m < m1 - 1; m++)
 		total1 += daysInMonth[m];
 	total1 += d1;
 
 	int total2 = 0;
 
 	for (int y = 0; y < y2; y++) total2 += 365;
-	for (int m = 0; m < m2 - 1; m++) 
+	for (int m = 0; m < m2 - 1; m++)
 		total2 += daysInMonth[m];
 	total2 += d2;
 
@@ -154,7 +196,7 @@ string reservationStatusToString(ReservationStatus status) {
 //Calculate fine amount
 double calculateFine(const string& dueDate, const string& returnDate) {
 
-	int daysLate = calculateDaysDifference(dueDate,returnDate);
+	int daysLate = calculateDaysDifference(dueDate, returnDate);
 
 	if (daysLate <= 0)
 		return 0.0;
@@ -201,8 +243,8 @@ string getNextMemberId() {
 string getNextBorrowRecordId() {
 	int maxNum = 0;
 	for (const auto& br : borrowRecords) {
-		if (br.recordID.length() > 2) { 
-			string numPart = br.recordID.substr(2);  
+		if (br.recordID.length() > 2) {
+			string numPart = br.recordID.substr(2);
 			bool isDigit = true;
 			for (char c : numPart) {
 				if (!isdigit(c)) {
@@ -222,8 +264,8 @@ string getNextBorrowRecordId() {
 string getNextReservationId() {
 	int maxNum = 0;
 	for (const auto& r : reservations) {
-		if (r.reservationID.length() > 2) {  
-			string numPart = r.reservationID.substr(2);  
+		if (r.reservationID.length() > 2) {
+			string numPart = r.reservationID.substr(2);
 			bool isDigit = true;
 			for (char c : numPart) {
 				if (!isdigit(c)) { isDigit = false; break; }
@@ -293,7 +335,7 @@ void loadMembers() {
 		string id, name, contact, pwd, typeStr;
 		int borrowCount;
 		bool isActive;
-		int rewardPoints;          
+		int rewardPoints;
 		int bonusBorrowLimit;
 
 		getline(ss, id, '|');
@@ -305,7 +347,7 @@ void loadMembers() {
 		ss.ignore();
 		ss >> isActive;
 		ss.ignore();
-		ss >> rewardPoints;      
+		ss >> rewardPoints;
 		ss.ignore();
 		ss >> bonusBorrowLimit;
 
@@ -318,7 +360,7 @@ void loadMembers() {
 		m.membershipType = type;
 		m.borrowedCount = borrowCount;
 		m.isActive = isActive;
-		m.rewardPoints = rewardPoints;        
+		m.rewardPoints = rewardPoints;
 		m.bonusBorrowLimit = bonusBorrowLimit;
 		members.push_back(m);
 	}
@@ -338,7 +380,7 @@ void saveMembers() {
 			<< membershipTypeToString(m.membershipType) << "|"
 			<< m.borrowedCount << "|"
 			<< m.isActive << "|"
-			<< m.rewardPoints << "|"         
+			<< m.rewardPoints << "|"
 			<< m.bonusBorrowLimit << "\n";
 	}
 	file.close();
@@ -513,7 +555,8 @@ void saveMonthlyStats() {
 			<< monthlyStats[i].booksBorrowed << "|"
 			<< monthlyStats[i].booksReturned << "|"
 			<< monthlyStats[i].finesCollected << "|"
-			<< monthlyStats[i].reservationsMade << "\n";
+			<< monthlyStats[i].reservationsMade << "|"
+			<< monthlyStats[i].renewalsMade << "\n";
 	}
 	file.close();
 }
@@ -529,19 +572,21 @@ void loadMonthlyStats() {
 	int i = 0;
 	while (getline(file, line) && i < 12) {
 		stringstream ss(line);
-		string month, borrowed, returned, fines, reservations;
+		string month, borrowed, returned, fines, reservations, renewals;
 
 		getline(ss, month, '|');
 		getline(ss, borrowed, '|');
 		getline(ss, returned, '|');
 		getline(ss, fines, '|');
 		getline(ss, reservations, '|');
+		getline(ss,renewals,'|');
 
 		monthlyStats[i].month = stoi(month);
 		monthlyStats[i].booksBorrowed = stoi(borrowed);
 		monthlyStats[i].booksReturned = stoi(returned);
 		monthlyStats[i].finesCollected = stod(fines);
 		monthlyStats[i].reservationsMade = stoi(reservations);
+		monthlyStats[i].renewalsMade = stoi(renewals);
 		i++;
 	}
 	file.close();
@@ -582,6 +627,7 @@ void initializeMonthlyStats() {
 			monthlyStats[i].booksReturned = 0;
 			monthlyStats[i].finesCollected = 0.0;
 			monthlyStats[i].reservationsMade = 0;
+			monthlyStats[i].renewalsMade = 0;
 		}
 	}
 }
