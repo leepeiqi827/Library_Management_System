@@ -62,6 +62,7 @@ void paymentReportingMenu() {
 			break;
 		case 6:
 			cout << "Returning to main menu...\n";
+			cin.ignore(1000, '\n');
 			pause();
 			break;
 		default:
@@ -69,7 +70,7 @@ void paymentReportingMenu() {
 			cin.ignore(1000, '\n');
 			pause();
 		}
-	} while (choice != 7);
+	} while (choice != 6);
 	
 }
 
