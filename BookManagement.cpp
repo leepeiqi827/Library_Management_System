@@ -348,7 +348,7 @@ void borrowBook() {
                     br.memberID = memberID;
                     br.bookID = bookID;
                     br.borrowDate = getCurrentDate();
-                    br.dueDate = getDateFromDays(14);
+                    br.dueDate = getDateFromDays(7);
                     br.returnDate = "-";
                     br.isReturned = false;
                     br.fineAmount = 0.0;

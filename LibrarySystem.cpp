@@ -324,6 +324,7 @@ void loadMembers() {
 	}
 	file.close();
 }
+
 void saveMembers() {
 	ofstream file("data/members.txt");
 	if (!file.is_open())
@@ -342,6 +343,7 @@ void saveMembers() {
 	}
 	file.close();
 }
+
 void loadBooks() {
 	books.clear();
 	ifstream file("data/books.txt");
@@ -377,6 +379,7 @@ void loadBooks() {
 	}
 	file.close();
 }
+
 void saveBooks() {
 	ofstream file("data/books.txt");
 	if (!file.is_open())
@@ -393,6 +396,7 @@ void saveBooks() {
 	}
 	file.close();
 }
+
 void loadBorrowRecords() {
 	borrowRecords.clear();
 	ifstream file("data/borrowRecords.txt");
@@ -433,6 +437,7 @@ void loadBorrowRecords() {
 	}
 	file.close();
 }
+
 void saveBorrowRecords() {
 	ofstream file("data/borrowRecords.txt");
 	if (!file.is_open())
@@ -451,6 +456,7 @@ void saveBorrowRecords() {
 	}
 	file.close();
 }
+
 void loadReservations() {
 	reservations.clear();
 	ifstream file("data/reservations.txt");
@@ -479,6 +485,7 @@ void loadReservations() {
 	}
 	file.close();
 }
+
 void saveReservations() {
 	ofstream file("data/reservations.txt");
 	if (!file.is_open())
@@ -493,11 +500,59 @@ void saveReservations() {
 	}
 	file.close();
 }
+
+void saveMonthlyStats() {
+	ofstream file("data/monthlyStats.txt");
+	if (!file.is_open()) {
+		cout << "Warning: Could not save monthly statistics.\n";
+		return;
+	}
+
+	for (int i = 0; i < 12; i++) {
+		file << monthlyStats[i].month << "|"
+			<< monthlyStats[i].booksBorrowed << "|"
+			<< monthlyStats[i].booksReturned << "|"
+			<< monthlyStats[i].finesCollected << "|"
+			<< monthlyStats[i].reservationsMade << "\n";
+	}
+	file.close();
+}
+
+void loadMonthlyStats() {
+	ifstream file("data/monthlyStats.txt");
+	if (!file.is_open()) {
+		initializeMonthlyStats();
+		return;
+	}
+
+	string line;
+	int i = 0;
+	while (getline(file, line) && i < 12) {
+		stringstream ss(line);
+		string month, borrowed, returned, fines, reservations;
+
+		getline(ss, month, '|');
+		getline(ss, borrowed, '|');
+		getline(ss, returned, '|');
+		getline(ss, fines, '|');
+		getline(ss, reservations, '|');
+
+		monthlyStats[i].month = stoi(month);
+		monthlyStats[i].booksBorrowed = stoi(borrowed);
+		monthlyStats[i].booksReturned = stoi(returned);
+		monthlyStats[i].finesCollected = stod(fines);
+		monthlyStats[i].reservationsMade = stoi(reservations);
+		i++;
+	}
+	file.close();
+}
+
 void loadAllData() {
 	loadMembers();
 	loadBooks();
 	loadBorrowRecords();
 	loadReservations();
+	loadMonthlyStats();
 	cout << "Data loaded successfully.\n";
 }
 void saveAllData() {
@@ -505,14 +560,28 @@ void saveAllData() {
 	saveBooks();
 	saveBorrowRecords();
 	saveReservations();
+	saveMonthlyStats();
 	cout << "Data saved successfully.\n";
 }
 void initializeMonthlyStats() {
+	bool hasData = false;
 	for (int i = 0; i < 12; i++) {
-		monthlyStats[i].month = i + 1;
-		monthlyStats[i].booksBorrowed = 0;
-		monthlyStats[i].booksReturned = 0;
-		monthlyStats[i].finesCollected = 0.0;
-		monthlyStats[i].reservationsMade = 0;
+		if (monthlyStats[i].booksBorrowed > 0 ||
+			monthlyStats[i].booksReturned > 0 ||
+			monthlyStats[i].finesCollected > 0 ||
+			monthlyStats[i].reservationsMade > 0) {
+			hasData = true;
+			break;
+		}
+	}
+
+	if (!hasData) {
+		for (int i = 0; i < 12; i++) {
+			monthlyStats[i].month = i + 1;
+			monthlyStats[i].booksBorrowed = 0;
+			monthlyStats[i].booksReturned = 0;
+			monthlyStats[i].finesCollected = 0.0;
+			monthlyStats[i].reservationsMade = 0;
+		}
 	}
 }

@@ -15,7 +15,6 @@ void generateBorrowingReport();
 void generateOverdueReport();
 void displayBookCatalog();
 void generateMonthlyReport();
-void displayPaymentHistory(const string& memberID);
 
 // =========================== Main Menu ===========================
 void paymentReportingMenu() {
@@ -32,8 +31,7 @@ void paymentReportingMenu() {
 		cout << "	3. Generate Overdue Members Report\n";
 		cout << "	4. Display Full Book Catalog\n";
 		cout << "	5. Generate Monthly Statistics Report\n";
-		cout << "	6. Display Payment History\n";          
-		cout << "	7. Back to Main Menu\n";
+		cout << "	6. Back to Main Menu\n";
 		cout << "\n================================================\n";
 		cout << "Enter choice: ";
 		cin >> choice;
@@ -62,15 +60,7 @@ void paymentReportingMenu() {
 		case 5:
 			generateMonthlyReport();
 			break;
-		case 6: {
-			// Display Payment History
-			string memberID;
-			cout << "Enter Member ID: ";
-			cin >> memberID;
-			displayPaymentHistory(memberID);
-			break;
-		}
-		case 7:
+		case 6:
 			cout << "Returning to main menu...\n";
 			pause();
 			break;
@@ -398,36 +388,4 @@ void generateMonthlyReport() {
 	pause();
 }
 
-// Display payment history for a member
-void displayPaymentHistory(const string& memberID) {
-	cout << "\n=============================================================================\n";
-	cout << "                                Payment History";
-	cout << "\n=============================================================================\n";
-
-	bool found = false;
-	cout << left << setw(10) << "Record ID"
-		<< setw(12) << "Book ID"
-		<< setw(12) << "Due Date"
-		<< setw(12) << "Return Date"
-		<< setw(12) << "Fine (RM)" << endl;
-	cout << "\n=============================================================================\n";
-
-	for (const auto& br : borrowRecords) {
-		if (br.memberID == memberID && br.isReturned && br.fineAmount > 0) {
-			found = true;
-			cout << left << setw(10) << br.recordID
-				<< setw(12) << br.bookID
-				<< setw(12) << br.dueDate
-				<< setw(12) << br.returnDate
-				<< setw(12) << fixed << setprecision(2) << br.fineAmount << endl;
-		}
-	}
-
-	cout << "\n=============================================================================\n";
-	if (!found) {
-		cout << "No payment history found for this member.\n";
-	}
-	cin.ignore(1000, '\n');
-	pause();
-}
 

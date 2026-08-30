@@ -121,6 +121,8 @@ void loadBorrowRecords();
 void saveBorrowRecords();
 void loadReservations();
 void saveReservations();
+void saveMonthlyStats();
+void loadMonthlyStats();
 
 void initializeMonthlyStats();
 
