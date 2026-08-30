@@ -269,16 +269,17 @@ void renewBorrowing() {
 
     // Perform renewal
     br.renewalCount++;
-    br.dueDate = getDateFromDays(BORROW_DURATION_DAYS);
+    br.dueDate = addDaysToDate(br.dueDate,BORROW_DURATION_DAYS);
 
     // Update monthly statistics
     string currentDate = getCurrentDate();
     int month = stoi(currentDate.substr(3, 2)) - 1;
     if (month >= 0 && month < 12) {
-        monthlyStats[month].booksBorrowed++;
+        monthlyStats[month].renewalsMade++;
     }
 
     saveBorrowRecords();
+    saveMembers();
 
     cout << "\n=============================================================================\n";
     cout << "                               RENEWAL SUCCESSFUL!";
@@ -312,7 +313,7 @@ void viewOverdueList() {
     for (const auto& br : borrowRecords) {
         if (br.isReturned) continue;
 
-        int daysLate = calculateDaysDifference(br.dueDate,currentDate);
+        int daysLate = calculateDaysDifference(br.dueDate, currentDate);
 
         if (daysLate > 0) {
             found = true;
@@ -405,7 +406,7 @@ void cancelReservation() {
     string reservationID;
     cout << "\nEnter Reservation ID to cancel: ";
     cin >> reservationID;
-    for (auto& c : reservationID) 
+    for (auto& c : reservationID)
         c = toupper(c);
 
     int reservationIndex = -1;
@@ -529,7 +530,7 @@ bool canMemberReserve(const string& memberID) {
 
     for (const auto& br : borrowRecords) {
         if (br.memberID == memberID && !br.isReturned) {
-            int daysLate = calculateDaysDifference(br.dueDate,currentDate);
+            int daysLate = calculateDaysDifference(br.dueDate, currentDate);
             if (daysLate > 0) {
                 overdueCount++;
             }
@@ -612,7 +613,7 @@ bool canRenew(const string& recordID, string& errorMsg) {
     }
 
     string currentDate = getCurrentDate();
-    int daysLate = calculateDaysDifference(br.dueDate,currentDate);
+    int daysLate = calculateDaysDifference(br.dueDate, currentDate);
     if (daysLate > 0) {
         errorMsg = "This book is overdue by " + to_string(daysLate) +
             " days. Please return it first.";
@@ -621,7 +622,7 @@ bool canRenew(const string& recordID, string& errorMsg) {
 
     // Check if there are pending reservations for this book
     for (const auto& r : reservations) {
-        if (r.bookID == br.bookID && r.status == PENDING) {
+        if (r.bookID == br.bookID && r.status == PENDING && r.memberID != br.memberID) {
             errorMsg = "This book has pending reservations. Cannot renew.";
             return false;
         }
