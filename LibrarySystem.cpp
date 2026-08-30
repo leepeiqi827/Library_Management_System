@@ -1,4 +1,5 @@
 //LibrarySystem.cpp - Implementation of Shared Functions
+//Shared by all modules
 
 #include "LibrarySystem.h"
 #include<vector>
@@ -18,6 +19,14 @@ void pause() {
 	cin.get();
 }
 
+void clearScreen() {
+	#ifdef _WIN32
+		system("cls");
+	#else
+		system("clear");
+	#endif
+}
+
 //Generate unique ID
 string generateID(const string& prefix, int number) {
 	stringstream ss;
@@ -28,12 +37,14 @@ string generateID(const string& prefix, int number) {
 //Get current date as string (DD/MM/YYYY)
 string getCurrentDate() {
 	time_t now = time(nullptr);
-	tm* localTime = localtime(&now);
+	tm localTime = {};
+
+	localtime_s(&localTime, &now);
 
 	stringstream ss;
-	ss << setw(2) << setfill('0') << localTime->tm_mday << "/"
-		<< setw(2) << setfill('0') << (localTime->tm_mon + 1) << "/"
-		<< (localTime->tm_year + 1900);
+	ss << setw(2) << setfill('0') << localTime.tm_mday << "/"
+		<< setw(2) << setfill('0') << (localTime.tm_mon + 1) << "/"
+		<< (localTime.tm_year + 1900);
 
 	return ss.str();
 }
@@ -42,12 +53,14 @@ string getCurrentDate() {
 string getDateFromDays(int daysOffset) {
 	time_t now = time(nullptr);
 	now += daysOffset * 24 * 60 * 60;
-	tm* localTime = localtime(&now);
+	tm localTime = {};
+
+	localtime_s(&localTime, &now);
 
 	stringstream ss;
-	ss << setw(2) << setfill('0') << localTime->tm_mday << "/"
-		<< setw(2) << setfill('0') << (localTime->tm_mon + 1) << "/"
-		<< (localTime->tm_year + 1900);
+	ss << setw(2) << setfill('0') << localTime.tm_mday << "/"
+		<< setw(2) << setfill('0') << (localTime.tm_mon + 1) << "/"
+		<< (localTime.tm_year + 1900);
 
 	return ss.str();
 }
@@ -55,44 +68,44 @@ string getDateFromDays(int daysOffset) {
 //Calculate days differnt between two dates
 int calculateDaysDifference(const string& date1, const string& date2) {
 
-	int d1, m1, y1, d2, m2, y2;
-	char slash;
+	int d1 = stoi(date1.substr(0, 2));
+	int m1 = stoi(date1.substr(3, 2));
+	int y1 = stoi(date1.substr(6, 4));
 
-	stringstream ss1(date1);
-	ss1 >> d1 >> m1 >> y1;
+	int d2 = stoi(date2.substr(0, 2));
+	int m2 = stoi(date2.substr(3, 2));
+	int y2 = stoi(date2.substr(6, 4));
 
-	stringstream ss2(date2);
-	ss2 >> d2 >> m2 >> y2;
-
-	int daysInMonth[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+	int daysInMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 
 	int total1 = 0;
-	for (int y = 0; y < y1; y++)
+	for (int y = 0; y < y1; y++) 
 		total1 += 365;
-	for (int m = 0; m < m1 -1; m++)
+	for (int m = 0; m < m1 - 1; m++) 
 		total1 += daysInMonth[m];
 	total1 += d1;
 
 	int total2 = 0;
-	for (int y = 0; y < y2; y++)
-		total2 += 365;
-	for (int m = 0; m < m2 - 1; m++)
+
+	for (int y = 0; y < y2; y++) total2 += 365;
+	for (int m = 0; m < m2 - 1; m++) 
 		total2 += daysInMonth[m];
 	total2 += d2;
 
-	return total1 - total2;
+	//Return date2 - date1 (positive = date2 is later)
+	return total2 - total1;
 }
 
 // Convert MembershipType to string
 string membershipTypeToString(MembershipType type) {
 	switch (type) {
-	case STUDENT: 
+	case STUDENT:
 		return "STUDENT";
-	case STAFF:   
+	case STAFF:
 		return "STAFF";
-	case PUBLIC:  
+	case PUBLIC:
 		return "PUBLIC";
-	default:      
+	default:
 		return "UNKNOWN";
 	}
 }
@@ -100,11 +113,11 @@ string membershipTypeToString(MembershipType type) {
 //Convert MembershipType to string
 MembershipType stringToMembershipType(const string& str) {
 	string s = str;
-	for (auto& c : s) 
+	for (auto& c : s)
 		c = toupper(c);
-	if (s == "STUDENT") 
+	if (s == "STUDENT")
 		return STUDENT;
-	if (s == "STAFF") 
+	if (s == "STAFF")
 		return STAFF;
 	return PUBLIC;
 }
@@ -136,6 +149,92 @@ string reservationStatusToString(ReservationStatus status) {
 	else {
 		return "Cancelled";
 	}
+}
+
+//Calculate fine amount
+double calculateFine(const string& dueDate, const string& returnDate) {
+
+	int daysLate = calculateDaysDifference(dueDate,returnDate);
+
+	if (daysLate <= 0)
+		return 0.0;
+	return daysLate * FINE_PER_DAY;
+}
+
+// =========================== Id Generation Functions ===========================
+string getNextBookId() {
+	int maxNum = 0;
+	for (const auto& b : books) {
+		if (b.bookID.length() > 1) {
+			string numPart = b.bookID.substr(1);
+			bool isDigit = true;
+			for (char c : numPart) {
+				if (!isdigit(c)) { isDigit = false; break; }
+			}
+			if (isDigit) {
+				int num = stoi(numPart);
+				if (num > maxNum) maxNum = num;
+			}
+		}
+	}
+	return generateID("B", maxNum + 1);
+}
+
+string getNextMemberId() {
+	int maxNum = 0;
+	for (const auto& m : members) {
+		if (m.memberID.length() > 1) {
+			string numPart = m.memberID.substr(1);
+			bool isDigit = true;
+			for (char c : numPart) {
+				if (!isdigit(c)) { isDigit = false; break; }
+			}
+			if (isDigit) {
+				int num = stoi(numPart);
+				if (num > maxNum) maxNum = num;
+			}
+		}
+	}
+	return generateID("M", maxNum + 1);
+}
+
+string getNextBorrowRecordId() {
+	int maxNum = 0;
+	for (const auto& br : borrowRecords) {
+		if (br.recordID.length() > 2) { 
+			string numPart = br.recordID.substr(2);  
+			bool isDigit = true;
+			for (char c : numPart) {
+				if (!isdigit(c)) {
+					isDigit = false;
+					break;
+				}
+			}
+			if (isDigit) {
+				int num = stoi(numPart);
+				if (num > maxNum) maxNum = num;
+			}
+		}
+	}
+	return generateID("BR", maxNum + 1);
+}
+
+string getNextReservationId() {
+	int maxNum = 0;
+	for (const auto& r : reservations) {
+		if (r.reservationID.length() > 2) {  
+			string numPart = r.reservationID.substr(2);  
+			bool isDigit = true;
+			for (char c : numPart) {
+				if (!isdigit(c)) { isDigit = false; break; }
+			}
+			if (isDigit) {
+				int num = stoi(numPart);
+				if (num > maxNum) maxNum = num;
+			}
+		}
+	}
+	return generateID("RV", maxNum + 1);
 }
 
 // =========================== Find Functions ===========================
@@ -194,6 +293,8 @@ void loadMembers() {
 		string id, name, contact, pwd, typeStr;
 		int borrowCount;
 		bool isActive;
+		int rewardPoints;          
+		int bonusBorrowLimit;
 
 		getline(ss, id, '|');
 		getline(ss, name, '|');
@@ -203,9 +304,13 @@ void loadMembers() {
 		ss >> borrowCount;
 		ss.ignore();
 		ss >> isActive;
+		ss.ignore();
+		ss >> rewardPoints;      
+		ss.ignore();
+		ss >> bonusBorrowLimit;
 
 		MembershipType type = stringToMembershipType(typeStr);
-		Member m;                    
+		Member m;
 		m.memberID = id;
 		m.name = name;
 		m.contact = contact;
@@ -213,13 +318,15 @@ void loadMembers() {
 		m.membershipType = type;
 		m.borrowedCount = borrowCount;
 		m.isActive = isActive;
+		m.rewardPoints = rewardPoints;        
+		m.bonusBorrowLimit = bonusBorrowLimit;
 		members.push_back(m);
 	}
 	file.close();
 }
 void saveMembers() {
 	ofstream file("data/members.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	for (const auto& m : members) {
@@ -229,14 +336,16 @@ void saveMembers() {
 			<< m.password << "|"
 			<< membershipTypeToString(m.membershipType) << "|"
 			<< m.borrowedCount << "|"
-			<< m.isActive << "\n";
+			<< m.isActive << "|"
+			<< m.rewardPoints << "|"         
+			<< m.bonusBorrowLimit << "\n";
 	}
 	file.close();
 }
 void loadBooks() {
 	books.clear();
 	ifstream file("data/books.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	string line;
@@ -270,7 +379,7 @@ void loadBooks() {
 }
 void saveBooks() {
 	ofstream file("data/books.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	for (const auto& b : books) {
@@ -287,7 +396,7 @@ void saveBooks() {
 void loadBorrowRecords() {
 	borrowRecords.clear();
 	ifstream file("data/borrowRecords.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	string line;
@@ -326,7 +435,7 @@ void loadBorrowRecords() {
 }
 void saveBorrowRecords() {
 	ofstream file("data/borrowRecords.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	for (const auto& br : borrowRecords) {
@@ -345,7 +454,7 @@ void saveBorrowRecords() {
 void loadReservations() {
 	reservations.clear();
 	ifstream file("data/reservations.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	string line;
@@ -372,7 +481,7 @@ void loadReservations() {
 }
 void saveReservations() {
 	ofstream file("data/reservations.txt");
-	if (!file.is_open()) 
+	if (!file.is_open())
 		return;
 
 	for (const auto& r : reservations) {

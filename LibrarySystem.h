@@ -1,4 +1,5 @@
 //LibrarySystem.h - Shared Data Structures & Constants
+//Shared by all modules
 
 #ifndef LIBRARY_SYSTEM_H
 #define LIBRARY_SYSTEM_H
@@ -86,6 +87,7 @@ extern vector<MonthlyStatistics> monthlyStats;
 
 //Shared helper functions (used by multiple modules)
 void pause();
+void clearScreen();
 string generateID(const string& prefix, int number);
 string getCurrentDate();
 string getDateFromDays(int daysOffset);
@@ -96,6 +98,11 @@ string bookStatusToString(BookStatus status);
 string reservationStatusToString(ReservationStatus status);
 double calculateFine(const string& dueDate, const string& returnDate);
 void processReservationQueue(const string& bookID);
+
+string getNextBookId();
+string getNextMemberId();
+string getNextBorrowRecordId();
+string getNextReservationId();
 
 //Find Function
 bool findMemberByID(const string& id, int& index);
@@ -114,6 +121,8 @@ void loadBorrowRecords();
 void saveBorrowRecords();
 void loadReservations();
 void saveReservations();
+
+void initializeMonthlyStats();
 
 //Module Menu Function
 void memberManagementMenu();

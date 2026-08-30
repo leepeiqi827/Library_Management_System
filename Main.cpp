@@ -15,6 +15,7 @@ Team Members:
 using namespace std;
 
 //Function Prototypes
+void displayWelcomeScreen();
 void displayMainMenu();
 void exitSystem();
 
@@ -23,12 +24,12 @@ void exitSystem();
 // =========================== Main Function ===========================
 int main() {
 
+	displayWelcomeScreen();
+
 	// Load data from files
 	loadAllData();
 	initializeMonthlyStats();
 
-	// Initialize monthly statistics if empty
-	initializeMonthlyStats();
 
 	int choice;
 	do {
@@ -37,7 +38,9 @@ int main() {
 
 		if (cin.fail()) {
 			cin.clear();
+			cin.ignore(1000, '\n');
 			cout << "Invalid input! Please enter a number.\n";
+			pause();
 			continue;
 		}
 
@@ -59,13 +62,40 @@ int main() {
 			break;
 		default:
 			cout << "Invalid choice! Please enter 1-5.\n";
+			cin.ignore(1000, '\n');
+			pause();
 		}
 	} while (choice != 5);
 
 	return 0;
 }
 
+// Display welcome screen on program startup
+void displayWelcomeScreen() {
+	clearScreen();
+	cout << "\n";
+	cout << "==================================================================\n";
+	cout << "                   LIBRARY MANAGEMENT SYSTEM\n";
+	cout << "==================================================================\n";
+	cout << "             AMCS2123 Systems And Programming Concepts\n";
+	cout << "                      TAR UMT - June 2026\n";
+	cout << "==================================================================\n";
+	cout << "  Team: DCSY2S1 G3\n";
+	cout << "  Tutor: CHIA SHEN KHOO\n";
+	cout << "==================================================================\n";
+	cout << "  Team Members:\n";
+	cout << "  1. LEE PEI QI (25WMD03889) - Payment & Reporting\n";
+	cout << "  2. LIM ZHI YUAN (25WMD04162) - Reservation & Renewal\n";
+	cout << "  3. NEOH E CHYN (25WMD04015) - Book Management & Borrow/Return\n";
+	cout << "  4. FRENGKY WONG HAI XIANG (25WMD03962) - Member Management\n";
+	cout << "==================================================================\n";
+	cout << "\n";
+	pause();
+}
+
+// Display main menu
 void displayMainMenu() {
+	clearScreen();
 	cout << "\n================================================\n";
 	cout << "            Library Management System";
 	cout << "\n================================================\n";
@@ -80,14 +110,10 @@ void displayMainMenu() {
 
 }
 
+// Exit system and save all data
 void exitSystem() {
-	cout << "\n================================================\n";
-	cout << "		Exiting Library Management System......";
-	cout << "\n================================================\n";
-	cout << "  Thank you for using the Library Management System!\n";
-	cout << "  Goodbye!\n";
-}
-
-void initializeMonthlyStats() {
-
+	saveAllData();
+	cout << "Exiting Library Management System......\n";
+	cout << "Thank you for using the Library Management System!\n";
+	cout << "Goodbye!\n";
 }
