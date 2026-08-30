@@ -76,6 +76,7 @@ struct MonthlyStatistics {
 	int booksReturned;
 	double finesCollected;
 	int reservationsMade;
+	int renewalsMade;
 };
 
 // =========================== Golbal Variables ===========================
@@ -91,6 +92,8 @@ void clearScreen();
 string generateID(const string& prefix, int number);
 string getCurrentDate();
 string getDateFromDays(int daysOffset);
+int daysInMonth(int month, int year);
+string addDaysToDate(const string& date, int days);
 int calculateDaysDifference(const string& date1, const string& date2);
 string membershipTypeToString(MembershipType type);
 MembershipType stringToMembershipType(const string& str);
