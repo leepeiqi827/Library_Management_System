@@ -122,7 +122,7 @@ void processFinePayment() {
 		<< setw(15) << "Due Date"
 		<< setw(15) << "Return Date"
 		<< setw(12) << "Fine (RM)\n";
-	cout << "\n=============================================================================\n";
+	cout << "\n-----------------------------------------------------------------------------\n";
 	for (int records : fineIndices) {
 		const BorrowRecord& br = borrowRecords[records];
 		cout << left << setw(10) << br.recordID
@@ -162,7 +162,6 @@ void processFinePayment() {
 		outstandingFine = totalFine - paymentAmount;
 	}
 
-	// Update borrow records (mark fines as paid)
 	double remainingToPay = paid;
 	for (int idx : fineIndices) {
 		if (remainingToPay <= 0)
@@ -171,16 +170,18 @@ void processFinePayment() {
 		BorrowRecord& br = borrowRecords[idx];
 		if (remainingToPay >= br.fineAmount) {
 			remainingToPay -= br.fineAmount;
-			br.fineAmount = 0;
+			br.fineAmount = 0;         
+			br.isPaid = true;          
 		}
 		else {
-			br.fineAmount -= remainingToPay;
+			br.fineAmount -= remainingToPay;  
 			remainingToPay = 0;
+			br.isPaid = false;          
 		}
 	}
 
 	cout << "\n=============================================================================\n";
-	cout << "                                   Payment Receipt";
+	cout << "                             Payment Receipt";
 	cout << "\n=============================================================================\n";
 	cout << "Member ID: " << memberID << endl;
 	cout << "Member Name: " << members[memberIndex].name << endl;
@@ -208,9 +209,9 @@ void processFinePayment() {
 
 //Generate borrowing report (all borrow records)
 void generateBorrowingReport() {
-	cout << "\n=====================================================================================================\n";
-	cout << "                                           Borrowing Report";
-	cout << "\n=====================================================================================================\n";
+	cout << "\n====================================================================================================================\n";
+	cout << "                                                  Borrowing Report";
+	cout << "\n====================================================================================================================\n";
 
 	if (borrowRecords.empty()) {
 		cout << "No Borrowing records found.";
@@ -222,6 +223,8 @@ void generateBorrowingReport() {
 	int totalBorrowed = 0;
 	int totalReturned = 0;
 	double totalFines = 0.0;
+	double totalCollected = 0.0;
+	double totalPending = 0.0;
 
 	cout << left << setw(10) << "Record ID"
 		<< setw(10) << "Member ID"
@@ -230,10 +233,13 @@ void generateBorrowingReport() {
 		<< setw(14) << "Due Date"
 		<< setw(14) << "Return Date"
 		<< setw(12) << "Status"
-		<< setw(14) << "Fine (RM)" << endl;
-	cout << "\n=====================================================================================================\n";
+		<< setw(14) << "Fine (RM)" 
+		<< setw(12) << "Paid" << endl;
+	cout << "\n-------------------------------------------------------------------------------------------------------------------\n";
 	for (const auto& br : borrowRecords) {
 		string status = br.isReturned ? "Returned" : "Borrowed";
+		string paidStatus = br.isPaid ? "YES" : "NO";
+		double displayFine = br.isReturned ? br.fineAmount : 0.0;
 
 		cout << left << setw(10) << br.recordID
 			<< setw(10) << br.memberID
@@ -242,19 +248,30 @@ void generateBorrowingReport() {
 			<< setw(14) << br.dueDate
 			<< setw(14) << (br.isReturned ? br.returnDate : "-")
 			<< setw(12) << status
-			<< setw(14) << fixed << setprecision(2) << br.fineAmount << endl;
+			<< setw(14) << fixed << setprecision(2) << displayFine 
+			<< setw(12) << paidStatus << endl;
 
 		totalBorrowed++;
-		if (br.isReturned)
+		if (br.isReturned) {
 			totalReturned++;
-		totalFines += br.fineAmount;
+
+			if (br.isPaid) {
+				totalCollected += br.originalFineAmount;  
+			}
+			else {
+				totalPending += br.fineAmount;            
+			}
+			totalFines += br.originalFineAmount;
+		}
 	}
-	cout << "\n=====================================================================================================\n";
+	cout << "\n====================================================================================================================\n";
 	cout << " Summary: ";
 	cout << " Total Borrowed: " << totalBorrowed << endl;
 	cout << " Total Returned: " << totalReturned << endl;
-	cout << " Total Fines Collected: RM " << fixed << setprecision(2) << totalFines << endl;
-	cout << "\n=====================================================================================================\n";
+	cout << " Total Fines: RM " << fixed << setprecision(2) << totalFines << endl;
+	cout << " Collected: RM " << fixed << setprecision(2) << totalCollected << endl;
+	cout << " Pending: RM " << fixed << setprecision(2) << totalPending << endl;
+	cout << "\n====================================================================================================================\n";
 	cin.ignore(1000, '\n');
 	pause();
 
@@ -276,7 +293,7 @@ void generateOverdueReport() {
 		<< setw(12) << "Due Date"
 		<< setw(10) << "Days Late"
 		<< setw(12) << "Fine (RM)" << endl;
-	cout << "\n==================================================================================================\n";
+	cout << "\n-------------------------------------------------------------------------------------------------\n";
 
 	for (const auto& br : borrowRecords) {
 		if (br.isReturned)
@@ -305,7 +322,7 @@ void generateOverdueReport() {
 	if (!found) {
 		cout << "No overdue members found." << endl;
 	}
-	cout << "\n==================================================================================================\n";
+	cout << "\n-------------------------------------------------------------------------------------------------\n";
 	cin.ignore(1000, '\n');
 	pause();
 
@@ -330,7 +347,7 @@ void displayBookCatalog() {
 		<< setw(8) << "Total"
 		<< setw(10) << "Available"
 		<< setw(12) << "Status" << endl;
-	cout << "\n=======================================================================================================================\n";
+	cout << "\n------------------------------------------------------------------------------------------------------------------------\n";
 
 	for (const auto& b : books) {
 		cout << left << setw(8) << b.bookID
@@ -347,9 +364,9 @@ void displayBookCatalog() {
 
 //Generate monthly statistics report
 void generateMonthlyReport() {
-	cout << "\n=============================================================================\n";
-	cout << "                            Monthly Statistics Report";
-	cout << "\n=============================================================================\n";
+	cout << "\n==========================================================================================\n";
+	cout << "                                Monthly Statistics Report";
+	cout << "\n==========================================================================================\n";
 
 	cout << left << setw(8) << "Month"
 		<< setw(18) << "Books Borrowed"
@@ -357,7 +374,7 @@ void generateMonthlyReport() {
 		<< setw(18) << "Reservations"
 		<< setw(18) << "Renewals"
 		<< setw(18) << "Fines (RM)" << endl;
-	cout << "\n=============================================================================\n";
+	cout << "\n------------------------------------------------------------------------------------------\n";
 
 	string months[] = { "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec" };
 
@@ -370,7 +387,7 @@ void generateMonthlyReport() {
 			<< setw(18) << fixed << setprecision(2)
 			<< monthlyStats[i].finesCollected << endl;
 	}
-	cout << "\n=============================================================================\n";
+	cout << "\n==========================================================================================\n";
 
 	int totalBorrowed = 0, totalReturned = 0, totalReservations = 0;
 	double totalFines = 0.0;
@@ -386,7 +403,7 @@ void generateMonthlyReport() {
 		<< setw(18) << totalReturned
 		<< setw(18) << totalReservations
 		<< setw(18) << fixed << setprecision(2) << totalFines << endl;
-	cout << "\n=============================================================================\n";
+	cout << "\n==========================================================================================\n";
 	cin.ignore(1000, '\n');
 	pause();
 }
