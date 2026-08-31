@@ -29,14 +29,14 @@ bool isValidEmail(const string& email) {
     return regex_match(email, pattern);
 }
 
-//Validate phone number (at least 7 digits)
+//Validate phone number (at least 11 digits)
 bool isValidPhone(const string& phone) {
-    // Accept digits, spaces, parentheses, hyphens; at least 7 digits
+    // Accept digits, spaces, parentheses, hyphens; at least 11 digits
     string clean;
     for (char c : phone) {
         if (isdigit(c)) clean += c;
     }
-    return clean.length() >= 7 && clean.length() <= 11;
+    return  clean.length() == 11;
 }
 
 //Validate password (at least 6 characters)
