@@ -9,6 +9,18 @@
 
 using namespace std;
 
+//Validate name (only letters, spaces, and optionally allowed chars)
+bool isValidName(const string& name) {
+    if (name.empty()) return false;
+    for (char c : name) {
+        
+        if (!isalpha(c) && c != ' ') {
+            return false;
+        }
+    }
+    return true;
+}
+
 // ---------------------- Helper Functions for Member Management ----------------------
 //Validate email format using regex
 bool isValidEmail(const string& email) {
@@ -24,13 +36,28 @@ bool isValidPhone(const string& phone) {
     for (char c : phone) {
         if (isdigit(c)) clean += c;
     }
-    return clean.length() >= 7 && clean.length() <= 15;
+    return clean.length() >= 7 && clean.length() <= 11;
 }
 
 //Validate password (at least 6 characters)
 bool isValidPassword(const string& pass) {
     // At least 6 characters
     return pass.length() >= 6;
+}
+
+//yes/no prompt
+bool getYesNo(const string& prompt) {
+    string input;
+    while (true) {
+        cout << prompt << " (y/n): ";
+        getline(cin, input);
+        // Trim spaces
+        input.erase(0, input.find_first_not_of(" \t\n\r"));
+        input.erase(input.find_last_not_of(" \t\n\r") + 1);
+        if (input == "y" || input == "Y") return true;
+        if (input == "n" || input == "N") return false;
+        cout << "Invalid input! Please enter 'y' or 'n'.\n";
+    }
 }
 
 //Display a single member's information
@@ -112,6 +139,11 @@ void memberManagementMenu() {
                 pause();
                 break;
             }
+            else if  (!isValidName(newMember.name)) {
+                cout << "Invalid name! Only letters and spaces are allowed (no numbers or symbols).\n";
+                pause();
+                break;
+            }
 
             bool contactValid = false;
             do {
@@ -139,7 +171,8 @@ void memberManagementMenu() {
             while (typeStr != "STUDENT" && typeStr != "STAFF" && typeStr != "PUBLIC") {
                 cout << "Invalid membership type! Please enter STUDENT, STAFF, or PUBLIC: ";
                 getline(cin, typeStr);
-                for (auto& c : typeStr) c = toupper(c);
+                for (auto& c : typeStr)
+                 c = toupper(c);
             }
             newMember.membershipType = stringToMembershipType(typeStr);
 
@@ -298,20 +331,14 @@ void memberManagementMenu() {
                 pause();
                 break;
             }
-            cout << "Are you sure you want to delete member " << it->name << "? (y/n): ";
-            char confirm;
-            cin >> confirm;
-            cin.ignore(1000, '\n');
-            if (tolower(confirm) == 'y') {
+            if (getYesNo("Are you sure you want to delete member " + it->name + "?")) {
                 members.erase(it);
                 saveMembers();
                 cout << "Member deleted.\n";
-                pause();
-            }
-            else {
+            } else {
                 cout << "Deletion cancelled.\n";
-                pause();
             }
+            pause();
             break;
         }
 
@@ -367,11 +394,12 @@ void memberManagementMenu() {
             cout << "\nMember: " << it->name << endl;
             cout << "Current Status: " << (it->isActive ? "ACTIVE" : "INACTIVE") << endl;
             cout << "New Status: " << (it->isActive ? "INACTIVE" : "ACTIVE") << endl;
-            cout << "Confirm? (y/n): ";
-            char confirm;
-            cin >> confirm;
-            cin.ignore(1000, '\n');
-            if (tolower(confirm) != 'y') {
+            if (getYesNo("Confirm status change")) {
+                it->isActive = !it->isActive;
+                saveMembers();
+                cout << "Member " << it->name << " is now "
+                    << (it->isActive ? "ACTIVE" : "INACTIVE") << ".\n";
+            } else {
                 cout << "Operation cancelled.\n";
                 pause();
                 break;
