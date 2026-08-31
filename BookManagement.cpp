@@ -352,6 +352,7 @@ void borrowBook() {
                     br.returnDate = "-";
                     br.isReturned = false;
                     br.fineAmount = 0.0;
+                    br.renewalCount = 0;
 
                     //Update states
                     books[bookIndex].availableCopies--;
