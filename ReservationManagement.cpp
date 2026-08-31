@@ -79,6 +79,30 @@ void reserveBook() {
     cout << "                           RESERVE A BOOK";
     cout << "\n=====================================================================\n";
 
+    cout << "\n--- Books Available for Reservation (All copies borrowed) ---\n";
+    cout << left << setw(8) << "Book ID"
+        << setw(45) << "Title"
+        << setw(20) << "Author"
+        << setw(12) << "Status" << endl;
+    cout << string(85, '-') << endl;
+    
+    bool hasReservableBooks = false;
+    for (const auto& b : books) {
+        if (b.status != LOST && b.availableCopies == 0 && b.totalCopies > 0) {
+            cout << left << setw(8) << b.bookID
+                << setw(45) << b.title
+                << setw(20) << b.author
+                << setw(12) << bookStatusToString(b.status) << endl;
+            hasReservableBooks = true;
+        }
+    }
+    
+    if (!hasReservableBooks) {
+        cout << "No books are currently available for reservation.\n";
+        cout << "All books either have available copies or are lost.\n\n";
+    }
+    cout << "=====================================================================\n\n";
+    
     string memberID;
     cout << "Enter Member ID: ";
     cin >> memberID;
