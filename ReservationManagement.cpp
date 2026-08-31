@@ -269,7 +269,7 @@ void renewBorrowing() {
 
     // Perform renewal
     br.renewalCount++;
-    br.dueDate = addDaysToDate(br.dueDate,BORROW_DURATION_DAYS);
+    br.dueDate = addDaysToDate(br.dueDate, BORROW_DURATION_DAYS);
 
     // Update monthly statistics
     string currentDate = getCurrentDate();
@@ -667,7 +667,9 @@ void processReservationQueue(const string& bookID) {
     newBr.returnDate = "-";
     newBr.isReturned = false;
     newBr.fineAmount = 0.0;
+    newBr.originalFineAmount = 0.0;
     newBr.renewalCount = 0;
+    newBr.isPaid = false;
 
     borrowRecords.push_back(newBr);
 

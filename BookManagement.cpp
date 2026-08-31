@@ -352,7 +352,9 @@ void borrowBook() {
                     br.returnDate = "-";
                     br.isReturned = false;
                     br.fineAmount = 0.0;
+                    br.originalFineAmount = 0.0;
                     br.renewalCount = 0;
+                    br.isPaid = false;
 
                     //Update states
                     books[bookIndex].availableCopies--;
@@ -458,14 +460,22 @@ void returnBook() {
     BorrowRecord& br = borrowRecords[recIndex];
     br.returnDate = getCurrentDate();
     br.isReturned = true;
-    br.fineAmount = calculateFine(br.dueDate, br.returnDate);
 
-    //Award points
-    if (br.fineAmount == 0.0) {
+    int daysLate = calculateDaysDifference(br.dueDate, br.returnDate);
+    if (daysLate > 0) {
+        br.fineAmount = daysLate * FINE_PER_DAY;
+        br.originalFineAmount = br.fineAmount;  
+        br.isPaid = false;                      
+    }
+    else {
+        br.fineAmount = 0.0;
+        br.originalFineAmount = 0.0;
+        br.isPaid = true;     
+
         int mIdx = -1;
         if (findMemberByID(br.memberID, mIdx)) {
-            members[mIdx].rewardPoints += 5; //add 5 points 
-            cout << "On-Time Return Bonus: Earned +5 Reward Points!\n";
+            members[mIdx].rewardPoints += 5;
+            cout << "\nOn-Time Return Bonus: Earned +5 Reward Points!\n";
         }
     }
 

@@ -451,7 +451,9 @@ void loadBorrowRecords() {
 		string id, memberID, bookID, borrowDate, dueDate, returnDate;
 		bool isReturned;
 		double fine;
+		double originalFine;
 		int renewalCount;
+		bool isPaid;
 
 		getline(ss, id, '|');
 		getline(ss, memberID, '|');
@@ -463,7 +465,11 @@ void loadBorrowRecords() {
 		ss.ignore();
 		ss >> fine;
 		ss.ignore();
+		ss >> originalFine;      
+		ss.ignore();
 		ss >> renewalCount;
+		ss.ignore();
+		ss >> isPaid;
 
 		BorrowRecord br;
 		br.recordID = id;
@@ -474,7 +480,9 @@ void loadBorrowRecords() {
 		br.returnDate = returnDate;
 		br.isReturned = isReturned;
 		br.fineAmount = fine;
+		br.originalFineAmount = originalFine;
 		br.renewalCount = renewalCount;
+		br.isPaid = isPaid;
 		borrowRecords.push_back(br);
 	}
 	file.close();
@@ -494,7 +502,9 @@ void saveBorrowRecords() {
 			<< br.returnDate << "|"
 			<< br.isReturned << "|"
 			<< br.fineAmount << "|"
-			<< br.renewalCount << "\n";
+			<< br.originalFineAmount << "|"
+			<< br.renewalCount << "|"
+			<< br.isPaid << "\n";
 	}
 	file.close();
 }
@@ -579,7 +589,7 @@ void loadMonthlyStats() {
 		getline(ss, returned, '|');
 		getline(ss, fines, '|');
 		getline(ss, reservations, '|');
-		getline(ss,renewals,'|');
+		getline(ss, renewals, '|');
 
 		monthlyStats[i].month = stoi(month);
 		monthlyStats[i].booksBorrowed = stoi(borrowed);

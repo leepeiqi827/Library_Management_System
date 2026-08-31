@@ -59,7 +59,9 @@ struct BorrowRecord {
 	string returnDate;
 	bool isReturned;
 	double fineAmount;
+	double originalFineAmount;
 	int renewalCount;
+	bool isPaid;
 };
 
 struct Reservation {
