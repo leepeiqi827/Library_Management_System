@@ -151,7 +151,7 @@ void memberManagementMenu() {
 
             bool contactValid = false;
             do {
-                newMember.contact = inputString("Enter contact (email or phone) [e.g., user@mail.com or 01123456789]: ");
+                newMember.contact = inputString("Enter contact (email or phone) [e.g., user@gmail.com or 01123456789]: ");
                 if (isValidEmail(newMember.contact) || isValidPhone(newMember.contact)) {
                     contactValid = true;
                 }
