@@ -22,10 +22,8 @@ bool isValidName(const string& name) {
 }
 
 // ---------------------- Helper Functions for Member Management ----------------------
-//Validate email format using regex
 bool isValidEmail(const string& email) {
-    // Simple regex for email validation
-    regex pattern(R"((\w+)(\.\w+)*@(\w+)(\.\w+)+)");
+    regex pattern(R"(^[A-Za-z0-9]+@gmail\.com$)");
     return regex_match(email, pattern);
 }
 
@@ -39,10 +37,16 @@ bool isValidPhone(const string& phone) {
     return  clean.length() == 11;
 }
 
-//Validate password (at least 6 characters)
 bool isValidPassword(const string& pass) {
-    // At least 6 characters
-    return pass.length() >= 6;
+    int count = 0;
+
+    for (char c : pass) {
+        if (!isspace(static_cast<unsigned char>(c))) {
+            count++;
+        }
+    }
+
+    return count >= 6;
 }
 
 //yes/no prompt
