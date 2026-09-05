@@ -22,8 +22,9 @@ bool isValidName(const string& name) {
 }
 
 // ---------------------- Helper Functions for Member Management ----------------------
+// Validate email format
 bool isValidEmail(const string& email) {
-    regex pattern(R"(^[A-Za-z0-9]+@gmail\.com$)");
+    regex pattern(R"(^[A-Za-z][A-Za-z0-9]*@gmail\.com$)");
     return regex_match(email, pattern);
 }
 
